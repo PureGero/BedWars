@@ -5,12 +5,17 @@ import net.justminecraft.minigames.minigamecore.MG;
 import net.justminecraft.minigames.minigamecore.Minigame;
 import net.justminecraft.minigames.minigamecore.worldbuffer.WorldBuffer;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Team;
 
 import java.util.List;
 
@@ -49,12 +54,26 @@ public class BedWars extends Minigame implements Listener {
     }
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent e) {
-        if (e.getBlock().getType() == Material.STONE) {
+    public void onPlayerMove(PlayerMoveEvent e) {
+        if (e.getFrom().getChunk() != e.getTo().getChunk()) {
             Game g = MG.core().getGame(e.getPlayer());
             if (g != null && g.minigame == this) {
-                BedWarsGame s = (BedWarsGame) g;
+                BedWarsGame game = (BedWarsGame) g;
+                game.sendBeds(e.getPlayer());
+            }
+        }
+    }
 
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent e) {
+        if (e.getClickedBlock() != null) {
+            Game g = MG.core().getGame(e.getPlayer());
+            if (g != null && g.minigame == this) {
+                BedWarsGame game = (BedWarsGame) g;
+                ColouredBed bed = game.beds.get(e.getClickedBlock());
+                if (bed != null) {
+                    Bukkit.getScheduler().runTaskLater(this, () -> bed.send(e.getPlayer()), 0);
+                }
             }
         }
     }
@@ -78,17 +97,54 @@ public class BedWars extends Minigame implements Listener {
         }
 
         List<Location> spawnLocations = g.getSpawnLocations();
+        List<ChatColor> colors = g.getColors();
+        List<Integer> colorDatas = g.getColorData();
 
-        for (Player p : g.players) {
+        Objective bedAlive = g.scoreboard.registerNewObjective("bedAlive", "dummy");
+        bedAlive.setDisplayName(ChatColor.YELLOW + ChatColor.BOLD.toString() + "BED WARS");
+        bedAlive.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        bedAlive.getScore("  ").setScore(4);
+        bedAlive.getScore(" ").setScore(2);
+        bedAlive.getScore(ChatColor.YELLOW + "justminecraft.net").setScore(1);
+
+        Objective health = g.scoreboard.registerNewObjective("health", "health");
+        health.setDisplaySlot(DisplaySlot.BELOW_NAME);
+
+        for (Player player : g.players) {
+            MG.resetPlayer(player);
             Location spawnLocation = spawnLocations.remove(0);
-            p.teleport(spawnLocation.add(0.5, 0, 0.5));
-            MG.resetPlayer(p);
-            p.setBedSpawnLocation(spawnLocation.clone().add(2, 0, 0));
-            p.playSound(p.getLocation(), Sound.LEVEL_UP, 2, 1);
-            g.minigame.message(p, "Game has started!");
-            p.sendMessage("Destroy the other player's beds to stop them from respawning!");
-            p.sendMessage("Buy gear from the villagers with iron and diamonds!");
+            ChatColor color = colors.remove(0);
+            int colorData = colorDatas.remove(0);
+
+            player.teleport(spawnLocation.add(0.5, 0, 0.5));
+            player.setBedSpawnLocation(spawnLocation.clone().add(2, 0, 0));
+            player.playSound(player.getLocation(), Sound.LEVEL_UP, 2, 1);
+            g.minigame.message(player, "Game has started!");
+            player.sendMessage("Destroy the other player's beds to stop them from respawning!");
+            player.sendMessage("Buy gear from the villagers with iron and diamonds!");
+
+            Team team = g.scoreboard.registerNewTeam(player.getName());
+            team.setPrefix(color.toString());
+            team.setAllowFriendlyFire(false);
+            team.setCanSeeFriendlyInvisibles(true);
+
+            player.setScoreboard(g.scoreboard);
+            team.addEntry(player.getName());
+
+            bedAlive.getScore(color + player.getName() + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤").setScore(3);
+
+            for (Block bed : new Block[] {
+                    spawnLocation.getBlock().getRelative(2, 0, 0),
+                    spawnLocation.getBlock().getRelative(1, 0, 0)
+            }) {
+                g.beds.put(bed, new ColouredBed(bed, colorData));
+            }
         }
+
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            g.players.forEach(p -> g.sendBeds(p));
+        }, 20);
 
         // Fix players not seeing eachother bug
         Bukkit.getScheduler().scheduleSyncDelayedTask(BedWars.this, () -> {
@@ -139,9 +195,9 @@ public class BedWars extends Minigame implements Listener {
             }
         }
         w.setBlockAt(l.clone().add(0, -1, 0), Material.IRON_BLOCK);
-        w.setBlockAt(l.clone().add(1, 0, 0), Material.BED_BLOCK);
-        w.setBlockAt(l.clone().add(2, 0, 0), Material.BED_BLOCK);
-    }
+        w.setBlockAt(l.clone().add(1, 0, 0), Material.BED_BLOCK, (byte) 3);
+        w.setBlockAt(l.clone().add(2, 0, 0), Material.BED_BLOCK, (byte) (8 | 3));
+     }
 
 
 }
