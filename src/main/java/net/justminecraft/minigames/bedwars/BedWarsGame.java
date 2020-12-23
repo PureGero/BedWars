@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -133,9 +134,10 @@ public class BedWarsGame extends Game {
 
     @Override
     public void onPlayerDeath(Player p) {
-        if (p.getBedSpawnLocation() == null || p.getBedSpawnLocation().getBlock().getType() != Material.BED_BLOCK) {
+        if (p.getBedSpawnLocation() == null) {
             playerLeave(p);
         } else {
+            p.setVelocity(new Vector(0, 0, 0));
             p.spigot().respawn();
         }
     }

@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -81,6 +82,19 @@ public class BedWars extends Minigame implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Player) {
+            Game g = MG.core().getGame((Player) e.getEntity());
+            if (g != null && g.minigame == this) {
+                if (e.getCause() == EntityDamageEvent.DamageCause.VOID) {
+                    e.setCancelled(false);
+                    e.setDamage(1000);
+                }
+            }
+        }
+    }
+
     @Override
     public Game newGame() {
         return new BedWarsGame(this);
@@ -119,7 +133,7 @@ public class BedWars extends Minigame implements Listener {
 
             spawnLocation.setYaw(getAngleDegrees(spawnLocation));
 
-            player.teleport(spawnLocation.add(0.5, 0, 0.5));
+            player.teleport(spawnLocation.clone().add(0.5, 0, 0.5));
             player.setBedSpawnLocation(spawnLocation.clone().add(-Math.sin(getAngle(spawnLocation)) * 2, 0, Math.cos(getAngle(spawnLocation)) * 2));
             player.playSound(player.getLocation(), Sound.LEVEL_UP, 2, 1);
             g.minigame.message(player, "Game has started!");
@@ -168,6 +182,7 @@ public class BedWars extends Minigame implements Listener {
         g.disableBlockBreaking = false;
         g.disableBlockPlacing = false;
         g.disableHunger = true;
+        g.disablePvP = false;
 
         long t = System.currentTimeMillis();
         for (int x = -10; x < 10; x++) {
