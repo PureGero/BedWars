@@ -117,6 +117,8 @@ public class BedWars extends Minigame implements Listener {
             ChatColor color = colors.remove(0);
             int colorData = colorDatas.remove(0);
 
+            spawnLocation.setYaw(getAngleDegrees(spawnLocation));
+
             player.teleport(spawnLocation.add(0.5, 0, 0.5));
             player.setBedSpawnLocation(spawnLocation.clone().add(-Math.sin(getAngle(spawnLocation)) * 2, 0, Math.cos(getAngle(spawnLocation)) * 2));
             player.playSound(player.getLocation(), Sound.LEVEL_UP, 2, 1);
