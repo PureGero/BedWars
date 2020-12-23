@@ -185,7 +185,7 @@ public class BedWars extends Minigame implements Listener {
     }
 
     private void generateEmeraldIsland(WorldBuffer w, Location location) {
-        w.placeSchematic(location, new File(getDataFolder(), "schematics/bedwars_emerald.schematic"));
+        w.placeSchematic(location, new File(getDataFolder(), "schematics/bedwars_emerald_small.schematic"));
     }
 
     private void generateDiamondIsland(WorldBuffer w, Location l) {

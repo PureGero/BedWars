@@ -18,7 +18,7 @@ import java.util.*;
 
 public class BedWarsGame extends Game {
 
-    private static final int DISTANCE = 60;
+    private static final int DISTANCE = 51;
 
     private static final List<ChatColor> COLORS = Arrays.asList(
             ChatColor.AQUA,
@@ -53,9 +53,15 @@ public class BedWarsGame extends Game {
     }
 
     public List<Location> getEmeraldSpawnLocations() {
+        /* Big map
         return Arrays.asList(
                 new Location(world, -11, 59, -11),
                 new Location(world, 11, 59, 11)
+        );
+        */
+        return Arrays.asList(
+                new Location(world, -10, 68, -10),
+                new Location(world, 10, 68, 10)
         );
     }
 
@@ -64,8 +70,8 @@ public class BedWarsGame extends Game {
 
         for (int i = 0; i < players.size(); i++) {
             double a = Math.PI*2 * (i * 2 + 1) / (players.size() * 2);
-            int x = (int) (Math.sin(a) * DISTANCE);
-            int z = (int) (-Math.cos(a) * DISTANCE);
+            int x = (int) (Math.sin(a) * (DISTANCE - 5));
+            int z = (int) (-Math.cos(a) * (DISTANCE - 5));
             locations.add(new Location(world, x, 64, z));
         }
 
@@ -79,6 +85,10 @@ public class BedWarsGame extends Game {
             double a = Math.PI*2 * i / players.size();
             int x = (int) (Math.sin(a) * DISTANCE);
             int z = (int) (-Math.cos(a) * DISTANCE);
+            if (x != 0 && z != 0) {
+                x = (int) (Math.sin(a) * (DISTANCE - 3));
+                z = (int) (-Math.cos(a) * (DISTANCE - 3));
+            }
             locations.add(new Location(world, x, 64, z));
         }
 
@@ -94,8 +104,8 @@ public class BedWarsGame extends Game {
                     continue;
                 }
                 double a = Math.PI*2 * i / 16;
-                int x = (int) (Math.sin(a) * DISTANCE);
-                int z = (int) (-Math.cos(a) * DISTANCE);
+                int x = (int) (Math.sin(a) * (DISTANCE - 5));
+                int z = (int) (-Math.cos(a) * (DISTANCE - 5));
                 locations.add(new Location(world, x, 64, z));
             }
         } else if (players.size() == 3) {
@@ -104,8 +114,8 @@ public class BedWarsGame extends Game {
                     continue;
                 }
                 double a = Math.PI*2 * i / 12;
-                int x = (int) (Math.sin(a) * DISTANCE);
-                int z = (int) (-Math.cos(a) * DISTANCE);
+                int x = (int) (Math.sin(a) * (DISTANCE - 5));
+                int z = (int) (-Math.cos(a) * (DISTANCE - 5));
                 locations.add(new Location(world, x, 64, z));
             }
         }
