@@ -17,6 +17,9 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class BedWars extends Minigame implements Listener {
@@ -108,9 +111,6 @@ public class BedWars extends Minigame implements Listener {
         bedAlive.getScore(" ").setScore(2);
         bedAlive.getScore(ChatColor.YELLOW + "justminecraft.net").setScore(1);
 
-        Objective health = g.scoreboard.registerNewObjective("health", "health");
-        health.setDisplaySlot(DisplaySlot.BELOW_NAME);
-
         for (Player player : g.players) {
             MG.resetPlayer(player);
             Location spawnLocation = spawnLocations.remove(0);
@@ -118,7 +118,7 @@ public class BedWars extends Minigame implements Listener {
             int colorData = colorDatas.remove(0);
 
             player.teleport(spawnLocation.add(0.5, 0, 0.5));
-            player.setBedSpawnLocation(spawnLocation.clone().add(2, 0, 0));
+            player.setBedSpawnLocation(spawnLocation.clone().add(-Math.sin(getAngle(spawnLocation)) * 2, 0, Math.cos(getAngle(spawnLocation)) * 2));
             player.playSound(player.getLocation(), Sound.LEVEL_UP, 2, 1);
             g.minigame.message(player, "Game has started!");
             player.sendMessage("Destroy the other player's beds to stop them from respawning!");
@@ -135,16 +135,14 @@ public class BedWars extends Minigame implements Listener {
             bedAlive.getScore(color + player.getName() + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤").setScore(3);
 
             for (Block bed : new Block[] {
-                    spawnLocation.getBlock().getRelative(2, 0, 0),
-                    spawnLocation.getBlock().getRelative(1, 0, 0)
+                    spawnLocation.getBlock().getRelative((int) -Math.sin(getAngle(spawnLocation)) * 2, 0, (int) Math.cos(getAngle(spawnLocation)) * 2),
+                    spawnLocation.getBlock().getRelative((int) -Math.sin(getAngle(spawnLocation)) * 3, 0, (int) Math.cos(getAngle(spawnLocation)) * 3),
             }) {
                 g.beds.put(bed, new ColouredBed(bed, colorData));
             }
         }
 
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            g.players.forEach(p -> g.sendBeds(p));
-        }, 20);
+        Bukkit.getScheduler().runTaskLater(this, () -> g.players.forEach(g::sendBeds), 20);
 
         // Fix players not seeing eachother bug
         Bukkit.getScheduler().scheduleSyncDelayedTask(BedWars.this, () -> {
@@ -155,6 +153,7 @@ public class BedWars extends Minigame implements Listener {
 
         g.ironTicker();
         g.diamondTicker();
+        g.emeraldTicker();
         g.spawnVillagers();
     }
 
@@ -169,35 +168,68 @@ public class BedWars extends Minigame implements Listener {
         g.disableHunger = true;
 
         long t = System.currentTimeMillis();
-        for (int x = -10; x < 10; x++)
-            for (int z = -10; z < 10; z++)
+        for (int x = -10; x < 10; x++) {
+            for (int z = -10; z < 10; z++) {
                 w.blankChunk(x, z);
+            }
+        }
 
+        List<Integer> colorData = g.getColorData();
+
+        generateEmeraldIsland(w, new Location(g.world, 0, 64, 0));
         g.getDiamondSpawnLocations().forEach(location -> generateDiamondIsland(w, location));
-        g.getSpawnLocations().forEach(location -> generatePlayerIsland(w, location));
+        g.getSpawnLocations().forEach(location -> generatePlayerIsland(w, location, colorData.remove(0)));
+        g.getIslandSpawnLocations().forEach(location -> generateIsland(w, location));
 
         getLogger().info("Generated map in " + (System.currentTimeMillis() - t) + "ms");
     }
 
-    private void generateDiamondIsland(WorldBuffer w, Location l) {
-        for (int x = -5; x <= 5; x++) {
-            for (int z = -5; z <= 5; z++) {
-                w.setBlockAt(l.clone().add(x, -1, z), Material.STONE);
-            }
-        }
-        w.setBlockAt(l.clone().add(0, -1, 0), Material.DIAMOND_BLOCK);
+    private void generateEmeraldIsland(WorldBuffer w, Location location) {
+        w.placeSchematic(location, new File(getDataFolder(), "schematics/bedwars_emerald.schematic"));
     }
 
-    private void generatePlayerIsland(WorldBuffer w, Location l) {
-        for (int x = -5; x <= 5; x++) {
-            for (int z = -5; z <= 5; z++) {
-                w.setBlockAt(l.clone().add(x, -1, z), Material.GRASS);
-            }
+    private void generateDiamondIsland(WorldBuffer w, Location l) {
+        String angleStr;
+        double angle = Math.toDegrees(Math.atan2(l.getBlockX(), -l.getBlockZ()));
+        if (angle <= -90) {
+            angleStr = "270";
+        } else if (angle <= 0) {
+            angleStr = "180";
+        } else if (angle <= 90) {
+            angleStr = "0";
+        } else {
+            angleStr = "90";
         }
-        w.setBlockAt(l.clone().add(0, -1, 0), Material.IRON_BLOCK);
-        w.setBlockAt(l.clone().add(1, 0, 0), Material.BED_BLOCK, (byte) 3);
-        w.setBlockAt(l.clone().add(2, 0, 0), Material.BED_BLOCK, (byte) (8 | 3));
-     }
+        w.placeSchematic(l, new File(getDataFolder(), "schematics/bedwars_diamond_" + angleStr + ".schematic"));
+    }
+
+    private void generatePlayerIsland(WorldBuffer w, Location l, int color) {
+        HashMap<Material, ArrayList<Location>> query = w.placeSchematic(l, new File(getDataFolder(), "schematics/bedwars_player_" + getAngleDegrees(l) + ".schematic"), Material.WOOL);
+        query.get(Material.WOOL).forEach(wool -> w.setBlockAt(wool, Material.WOOL, (byte) color));
+    }
+
+    private void generateIsland(WorldBuffer w, Location l) {
+        w.placeSchematic(l, new File(getDataFolder(), "schematics/bedwars_island_" + getAngleDegrees(l) + ".schematic"));
+    }
+
+    public int getAngleDegrees(Location location) {
+        double angle = Math.toDegrees(Math.atan2(location.getBlockX(), -location.getBlockZ()));
+        if (angle < -135) {
+            return 180;
+        } else if (angle <= -45) {
+            return 270;
+        } else if (angle < 45) {
+            return 0;
+        } else if (angle <= 135) {
+            return 90;
+        } else {
+            return 180;
+        }
+    }
+
+    public double getAngle(Location location) {
+        return Math.toRadians(getAngleDegrees(location));
+    }
 
 
 }

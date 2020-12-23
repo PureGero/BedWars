@@ -18,6 +18,8 @@ import java.util.*;
 
 public class BedWarsGame extends Game {
 
+    private static final int DISTANCE = 60;
+
     private static final List<ChatColor> COLORS = Arrays.asList(
             ChatColor.AQUA,
             ChatColor.RED,
@@ -42,14 +44,32 @@ public class BedWarsGame extends Game {
 
     Scoreboard scoreboard;
     HashMap<Block, ColouredBed> beds = new HashMap<>();
+    BedWars bedwars;
 
     public BedWarsGame(Minigame mg) {
         super(mg, false);
+        bedwars = (BedWars) mg;
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
     }
 
+    public List<Location> getEmeraldSpawnLocations() {
+        return Arrays.asList(
+                new Location(world, -11, 59, -11),
+                new Location(world, 11, 59, 11)
+        );
+    }
+
     public List<Location> getDiamondSpawnLocations() {
-        return Collections.singletonList(new Location(world, 0, 64, 0));
+        List<Location> locations = new ArrayList<>();
+
+        for (int i = 0; i < players.size(); i++) {
+            double a = Math.PI*2 * (i * 2 + 1) / (players.size() * 2);
+            int x = (int) (Math.sin(a) * DISTANCE);
+            int z = (int) (-Math.cos(a) * DISTANCE);
+            locations.add(new Location(world, x, 64, z));
+        }
+
+        return locations;
     }
 
     public List<Location> getSpawnLocations() {
@@ -57,9 +77,37 @@ public class BedWarsGame extends Game {
 
         for (int i = 0; i < players.size(); i++) {
             double a = Math.PI*2 * i / players.size();
-            int x = (int) Math.cos(a) * 70;
-            int z = (int) Math.sin(a) * 70;
+            int x = (int) (Math.sin(a) * DISTANCE);
+            int z = (int) (-Math.cos(a) * DISTANCE);
             locations.add(new Location(world, x, 64, z));
+        }
+
+        return locations;
+    }
+
+    public List<Location> getIslandSpawnLocations() {
+        List<Location> locations = new ArrayList<>();
+
+        if (players.size() == 1 || players.size() == 2 || players.size() == 4) {
+            for (int i = 0; i < 16; i++) {
+                if (i % (16 / players.size() / 2) == 0) {
+                    continue;
+                }
+                double a = Math.PI*2 * i / 16;
+                int x = (int) (Math.sin(a) * DISTANCE);
+                int z = (int) (-Math.cos(a) * DISTANCE);
+                locations.add(new Location(world, x, 64, z));
+            }
+        } else if (players.size() == 3) {
+            for (int i = 0; i < 12; i++) {
+                if (i % (12 / players.size() / 2) == 0) {
+                    continue;
+                }
+                double a = Math.PI*2 * i / 12;
+                int x = (int) (Math.sin(a) * DISTANCE);
+                int z = (int) (-Math.cos(a) * DISTANCE);
+                locations.add(new Location(world, x, 64, z));
+            }
         }
 
         return locations;
@@ -85,7 +133,7 @@ public class BedWarsGame extends Game {
     public void ironTicker() {
         Bukkit.getScheduler().scheduleSyncDelayedTask(minigame, () -> {
             if (!players.isEmpty()) {
-                getSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(0.5, 2, 0.5), new ItemStack(Material.IRON_INGOT)));
+                getSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(-Math.sin(bedwars.getAngle(location)) * -14 + 0.5, 2, Math.cos(bedwars.getAngle(location)) * -14 + 0.5), new ItemStack(Material.IRON_INGOT)));
                 ironTicker();
             }
         }, 20 * 2);
@@ -96,6 +144,15 @@ public class BedWarsGame extends Game {
             if (!players.isEmpty()) {
                 getDiamondSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(0.5, 2, 0.5), new ItemStack(Material.DIAMOND)));
                 diamondTicker();
+            }
+        }, 20 * 10);
+    }
+
+    public void emeraldTicker() {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(minigame, () -> {
+            if (!players.isEmpty()) {
+                getEmeraldSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(0.5, 2, 0.5), new ItemStack(Material.EMERALD)));
+                emeraldTicker();
             }
         }, 20 * 10);
     }
