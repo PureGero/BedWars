@@ -15,11 +15,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class BedWarsGame extends Game {
-
-    private static final int DISTANCE = 51;
 
     private static final List<ChatColor> COLORS = Arrays.asList(
             ChatColor.AQUA,
@@ -45,7 +46,8 @@ public class BedWarsGame extends Game {
 
     Scoreboard scoreboard;
     HashMap<Block, ColouredBed> beds = new HashMap<>();
-    BedWars bedwars;
+    private BedWars bedwars;
+    private Map map = null;
 
     public BedWarsGame(Minigame mg) {
         super(mg, false);
@@ -53,17 +55,22 @@ public class BedWarsGame extends Game {
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
     }
 
-    public List<Location> getEmeraldSpawnLocations() {
-        /* Big map
-        return Arrays.asList(
-                new Location(world, -11, 59, -11),
-                new Location(world, 11, 59, 11)
-        );
-        */
-        return Arrays.asList(
-                new Location(world, -10, 68, -10),
-                new Location(world, 10, 68, 10)
-        );
+    public Map randomMap() {
+        if (map != null) {
+            throw new IllegalStateException("map has already been set!");
+        }
+
+        return map = Map.values()[(int) (Math.random() * Map.values().length)];
+    }
+
+    private List<Location> getEmeraldSpawnLocations() {
+        ArrayList<Location> locations = new ArrayList<>();
+
+        for (Location location : map.getEmeraldSpawnPoints()) {
+            locations.add(new Location(world, location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+        }
+
+        return locations;
     }
 
     public List<Location> getDiamondSpawnLocations() {
@@ -71,8 +78,8 @@ public class BedWarsGame extends Game {
 
         for (int i = 0; i < players.size(); i++) {
             double a = Math.PI*2 * (i * 2 + 1) / (players.size() * 2);
-            int x = (int) (Math.sin(a) * (DISTANCE - 5));
-            int z = (int) (-Math.cos(a) * (DISTANCE - 5));
+            int x = (int) (Math.sin(a) * (map.getDistance() - 5));
+            int z = (int) (-Math.cos(a) * (map.getDistance() - 5));
             locations.add(new Location(world, x, 64, z));
         }
 
@@ -84,11 +91,11 @@ public class BedWarsGame extends Game {
 
         for (int i = 0; i < players.size(); i++) {
             double a = Math.PI*2 * i / players.size();
-            int x = (int) (Math.sin(a) * DISTANCE);
-            int z = (int) (-Math.cos(a) * DISTANCE);
+            int x = (int) (Math.sin(a) * map.getDistance());
+            int z = (int) (-Math.cos(a) * map.getDistance());
             if (x != 0 && z != 0) {
-                x = (int) (Math.sin(a) * (DISTANCE - 3));
-                z = (int) (-Math.cos(a) * (DISTANCE - 3));
+                x = (int) (Math.sin(a) * (map.getDistance() - 3));
+                z = (int) (-Math.cos(a) * (map.getDistance() - 3));
             }
             locations.add(new Location(world, x, 64, z));
         }
@@ -105,8 +112,8 @@ public class BedWarsGame extends Game {
                     continue;
                 }
                 double a = Math.PI*2 * i / 16;
-                int x = (int) (Math.sin(a) * (DISTANCE - 5));
-                int z = (int) (-Math.cos(a) * (DISTANCE - 5));
+                int x = (int) (Math.sin(a) * (map.getDistance() - 5));
+                int z = (int) (-Math.cos(a) * (map.getDistance() - 5));
                 locations.add(new Location(world, x, 64, z));
             }
         } else if (players.size() == 3) {
@@ -115,8 +122,8 @@ public class BedWarsGame extends Game {
                     continue;
                 }
                 double a = Math.PI*2 * i / 12;
-                int x = (int) (Math.sin(a) * (DISTANCE - 5));
-                int z = (int) (-Math.cos(a) * (DISTANCE - 5));
+                int x = (int) (Math.sin(a) * (map.getDistance() - 5));
+                int z = (int) (-Math.cos(a) * (map.getDistance() - 5));
                 locations.add(new Location(world, x, 64, z));
             }
         }

@@ -19,13 +19,15 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class BedWars extends Minigame implements Listener {
 
+    public static File DATA_FOLDER;
+
     public void onEnable() {
+        DATA_FOLDER = getDataFolder();
+
         MG.core().registerMinigame(this);
         getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("BedWars enabled");
@@ -184,6 +186,8 @@ public class BedWars extends Minigame implements Listener {
         g.disableHunger = true;
         g.disablePvP = false;
 
+        Map m = g.randomMap();
+
         long t = System.currentTimeMillis();
         for (int x = -10; x < 10; x++) {
             for (int z = -10; z < 10; z++) {
@@ -193,43 +197,42 @@ public class BedWars extends Minigame implements Listener {
 
         List<Integer> colorData = g.getColorData();
 
-        generateEmeraldIsland(w, new Location(g.world, 0, 64, 0));
-        g.getDiamondSpawnLocations().forEach(location -> generateDiamondIsland(w, location));
-        g.getSpawnLocations().forEach(location -> generatePlayerIsland(w, location, colorData.remove(0)));
-        g.getIslandSpawnLocations().forEach(location -> generateIsland(w, location));
+        generateEmeraldIsland(m, w, new Location(g.world, 0, 64, 0));
+        g.getDiamondSpawnLocations().forEach(location -> generateDiamondIsland(m, w, location));
+        g.getSpawnLocations().forEach(location -> generatePlayerIsland(m, w, location, colorData.remove(0)));
+        g.getIslandSpawnLocations().forEach(location -> generateIsland(m, w, location));
 
         getLogger().info("Generated map in " + (System.currentTimeMillis() - t) + "ms");
     }
 
-    private void generateEmeraldIsland(WorldBuffer w, Location location) {
-        w.placeSchematic(location, new File(getDataFolder(), "schematics/bedwars_emerald_small.schematic"));
+    private void generateEmeraldIsland(Map m, WorldBuffer w, Location l) {
+        m.placeSchematic(w, l, "emerald_small");
     }
 
-    private void generateDiamondIsland(WorldBuffer w, Location l) {
-        String angleStr;
+    private void generateDiamondIsland(Map m, WorldBuffer w, Location l) {
+        int angleDeg;
         double angle = Math.toDegrees(Math.atan2(l.getBlockX(), -l.getBlockZ()));
         if (angle <= -90) {
-            angleStr = "270";
+            angleDeg = 270;
         } else if (angle <= 0) {
-            angleStr = "180";
+            angleDeg = 180;
         } else if (angle <= 90) {
-            angleStr = "0";
+            angleDeg = 0;
         } else {
-            angleStr = "90";
+            angleDeg = 90;
         }
-        w.placeSchematic(l, new File(getDataFolder(), "schematics/bedwars_diamond_" + angleStr + ".schematic"));
+        m.placeSchematic(w, l, "diamond", angleDeg);
     }
 
-    private void generatePlayerIsland(WorldBuffer w, Location l, int color) {
-        HashMap<Material, ArrayList<Location>> query = w.placeSchematic(l, new File(getDataFolder(), "schematics/bedwars_player_" + getAngleDegrees(l) + ".schematic"), Material.WOOL);
-        query.get(Material.WOOL).forEach(wool -> w.setBlockAt(wool, Material.WOOL, (byte) color));
+    private void generatePlayerIsland(Map m, WorldBuffer w, Location l, int color) {
+        m.placeSchematic(w, l, "player", getAngleDegrees(l), color);
     }
 
-    private void generateIsland(WorldBuffer w, Location l) {
-        w.placeSchematic(l, new File(getDataFolder(), "schematics/bedwars_island_" + getAngleDegrees(l) + ".schematic"));
+    private void generateIsland(Map m, WorldBuffer w, Location l) {
+        m.placeSchematic(w, l, "island", getAngleDegrees(l));
     }
 
-    public int getAngleDegrees(Location location) {
+    private int getAngleDegrees(Location location) {
         double angle = Math.toDegrees(Math.atan2(location.getBlockX(), -location.getBlockZ()));
         if (angle < -135) {
             return 180;

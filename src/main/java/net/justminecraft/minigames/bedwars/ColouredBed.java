@@ -16,6 +16,7 @@ public class ColouredBed {
 
     public ColouredBed(Block block, int color) {
         location = block.getLocation();
+        //noinspection deprecation
         id = getBedId(block.getData(), color);
     }
 
