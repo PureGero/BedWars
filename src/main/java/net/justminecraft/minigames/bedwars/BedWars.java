@@ -10,6 +10,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -66,6 +68,27 @@ public class BedWars extends Minigame implements Listener {
             if (g != null && g.minigame == this) {
                 BedWarsGame game = (BedWarsGame) g;
                 game.sendBeds(e.getPlayer());
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent e) {
+        Game g = MG.core().getGame(e.getPlayer());
+        if (g instanceof BedWarsGame) {
+            BedWarsGame game = (BedWarsGame) g;
+            game.playerBlocks.add(e.getBlock());
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent e) {
+        Game g = MG.core().getGame(e.getPlayer());
+        if (g instanceof BedWarsGame) {
+            BedWarsGame game = (BedWarsGame) g;
+            if (!game.playerBlocks.contains(e.getBlock())) {
+                e.setCancelled(true);
+                e.getPlayer().sendMessage(ChatColor.RED + "You can only break player placed blocks!");
             }
         }
     }
@@ -136,7 +159,7 @@ public class BedWars extends Minigame implements Listener {
             spawnLocation.setYaw(getAngleDegrees(spawnLocation));
 
             player.teleport(spawnLocation.clone().add(0.5, 0, 0.5));
-            player.setBedSpawnLocation(spawnLocation.clone().add(-Math.sin(getAngle(spawnLocation)) * 2, 0, Math.cos(getAngle(spawnLocation)) * 2));
+            player.setBedSpawnLocation(spawnLocation.clone().add(-Math.sin(getAngle(spawnLocation)) * 2 + 0.5, 0, Math.cos(getAngle(spawnLocation)) * 2 + 0.5));
             player.playSound(player.getLocation(), Sound.LEVEL_UP, 2, 1);
             g.minigame.message(player, "Game has started!");
             player.sendMessage("Destroy the other player's beds to stop them from respawning!");

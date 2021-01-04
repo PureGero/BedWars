@@ -43,6 +43,7 @@ public class BedWarsGame extends Game {
 
     Scoreboard scoreboard;
     HashMap<Block, ColouredBed> beds = new HashMap<>();
+    HashSet<Block> playerBlocks = new HashSet<>();
     private BedWars bedwars;
     private Map map = null;
 
