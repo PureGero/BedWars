@@ -3,6 +3,7 @@ package net.justminecraft.minigames.bedwars;
 import net.justminecraft.minigames.minigamecore.worldbuffer.WorldBuffer;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,33 +12,57 @@ import java.util.HashMap;
 public enum Map {
     BEDWARS(
             51,
-            new Location[]{
-                    new Location(null, -10, 68, -10),
-                    new Location(null, 10, 68, 10)
+            new Vector(0, 2, -14),
+            new Vector(-5, 0, -9),
+            new Vector(5, 0, -9),
+            new Vector[] {
+                    new Vector(-10, 6, -10),
+                    new Vector(10, 6, 10)
             }
     ),
     MUSHROOM(
             51,
-            new Location[]{
-                    new Location(null, 0, 67, -6),
-                    new Location(null, 0, 67, 4)
+            new Vector(0, 2, -13),
+            new Vector(-3, 0, -9),
+            new Vector(3, 0, -9),
+            new Vector[] {
+                    new Vector(0, 5, -6),
+                    new Vector(0, 5, 4)
             }
     );
 
     private final int distance;
-    private final Location[] emeraldSpawnPoints;
+    private final Vector ironVector;
+    private final Vector shopVector;
+    private final Vector upgradeVector;
+    private final Vector[] emeraldVectors;
 
-    Map(int distance, Location[] emeraldSpawnPoints) {
+    Map(int distance, Vector ironVector, Vector shopVector, Vector upgradeVector, Vector[] emeraldVectors) {
         this.distance = distance;
-        this.emeraldSpawnPoints = emeraldSpawnPoints;
+        this.ironVector = ironVector;
+        this.shopVector = shopVector;
+        this.upgradeVector = upgradeVector;
+        this.emeraldVectors = emeraldVectors;
     }
 
     public int getDistance() {
         return distance;
     }
 
-    public Location[] getEmeraldSpawnPoints() {
-        return emeraldSpawnPoints;
+    public Vector getIronVector() {
+        return ironVector;
+    }
+
+    public Vector getShopVector() {
+        return shopVector;
+    }
+
+    public Vector getUpgradeVector() {
+        return upgradeVector;
+    }
+
+    public Vector[] getEmeraldVectors() {
+        return emeraldVectors;
     }
 
     public void placeSchematic(WorldBuffer w, Location l, String key) {
