@@ -6,6 +6,7 @@ import net.justminecraft.minigames.minigamecore.Minigame;
 import net.justminecraft.minigames.minigamecore.worldbuffer.WorldBuffer;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -86,9 +87,46 @@ public class BedWars extends Minigame implements Listener {
         Game g = MG.core().getGame(e.getPlayer());
         if (g instanceof BedWarsGame) {
             BedWarsGame game = (BedWarsGame) g;
-            if (!game.playerBlocks.contains(e.getBlock())) {
+            if (e.getBlock().getType() == Material.BED_BLOCK) {
+                onBedBreak(game, e.getPlayer(), e.getBlock());
+                e.setCancelled(true);
+            } else if (!game.playerBlocks.contains(e.getBlock())) {
                 e.setCancelled(true);
                 e.getPlayer().sendMessage(ChatColor.RED + "You can only break player placed blocks!");
+            }
+        }
+    }
+
+    private void onBedBreak(BedWarsGame game, Player player, Block block) {
+        Team bedTeam = null;
+
+        for (Player p : game.players) {
+            if (p.getBedSpawnLocation() != null
+                    && p.getBedSpawnLocation().getWorld().equals(block.getWorld())
+                    && p.getBedSpawnLocation().distanceSquared(block.getLocation()) < 5) {
+                bedTeam = game.scoreboard.getEntryTeam(p.getName());
+                p.sendMessage(ChatColor.BOLD + "Your bed has been destroyed!!");
+            }
+        }
+
+        if (bedTeam != null) {
+            Team team = game.scoreboard.getEntryTeam(player.getName());
+            game.broadcast(team.getPrefix() + player.getName() + ChatColor.GOLD + " has broken " + game.getTeamName(bedTeam) + "'s bed" + ChatColor.GOLD + "!");
+        }
+
+        setBedToAir(block);
+    }
+
+    private void setBedToAir(Block block) {
+        block.setType(Material.AIR, false);
+        for (BlockFace face : new BlockFace[] {
+                BlockFace.SOUTH,
+                BlockFace.NORTH,
+                BlockFace.WEST,
+                BlockFace.EAST
+        }) {
+            if (block.getRelative(face).getType() == Material.BED_BLOCK) {
+                setBedToAir(block.getRelative(face));
             }
         }
     }
@@ -165,15 +203,16 @@ public class BedWars extends Minigame implements Listener {
             player.sendMessage("Destroy the other player's beds to stop them from respawning!");
             player.sendMessage("Buy gear from the villagers with iron and diamonds!");
 
-            Team team = g.scoreboard.registerNewTeam(player.getName());
-            team.setPrefix(color.toString());
-            team.setAllowFriendlyFire(false);
-            team.setCanSeeFriendlyInvisibles(true);
+            Team team = g.scoreboard.getTeam(g.getColorName(color));
+            if (team == null) {
+                team = g.scoreboard.registerNewTeam(g.getColorName(color));
+                team.setPrefix(color.toString());
+                team.setAllowFriendlyFire(false);
+                team.setCanSeeFriendlyInvisibles(true);
+            }
 
             player.setScoreboard(g.scoreboard);
             team.addEntry(player.getName());
-
-            bedAlive.getScore(color + player.getName() + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤").setScore(3);
 
             for (Block bed : new Block[] {
                     spawnLocation.getBlock().getRelative((int) -Math.sin(getAngle(spawnLocation)) * 2, 0, (int) Math.cos(getAngle(spawnLocation)) * 2),
@@ -181,6 +220,10 @@ public class BedWars extends Minigame implements Listener {
             }) {
                 g.beds.put(bed, new ColouredBed(bed, colorData));
             }
+        }
+
+        for (Team team : g.scoreboard.getTeams()) {
+            bedAlive.getScore(g.getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤").setScore(3);
         }
 
         Bukkit.getScheduler().runTaskLater(this, () -> g.players.forEach(g::sendBeds), 20);

@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
 import java.util.*;
@@ -44,6 +45,7 @@ public class BedWarsGame extends Game {
     Scoreboard scoreboard;
     HashMap<Block, ColouredBed> beds = new HashMap<>();
     HashSet<Block> playerBlocks = new HashSet<>();
+    private int teamSize = 1;
     private BedWars bedwars;
     private Map map = null;
 
@@ -59,6 +61,23 @@ public class BedWarsGame extends Game {
         }
 
         return map = Map.values()[(int) (Math.random() * Map.values().length)];
+    }
+
+    public String getTeamName(Team team) {
+        if (teamSize == 1 && !team.getEntries().isEmpty()) {
+            return team.getPrefix() + team.getEntries().iterator().next();
+        }
+
+        for (ChatColor color : ChatColor.values()) {
+            if (color.toString().equals(team.getPrefix())) {
+                return getColorName(color);
+            }
+        }
+        return ChatColor.WHITE + "Unknown";
+    }
+
+    public String getColorName(ChatColor color) {
+        return color + color.name().substring(0, 1).toUpperCase() + color.name().substring(1).toLowerCase().replaceAll("_", " ");
     }
 
     private List<Location> getEmeraldSpawnLocations() {
