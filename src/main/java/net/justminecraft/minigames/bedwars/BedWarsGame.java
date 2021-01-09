@@ -12,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
@@ -45,6 +46,7 @@ public class BedWarsGame extends Game {
     Scoreboard scoreboard;
     HashMap<Block, ColouredBed> beds = new HashMap<>();
     HashSet<Block> playerBlocks = new HashSet<>();
+    HashMap<Player, Short> playerColours = new HashMap<>();
     private int teamSize = 1;
     private BedWars bedwars;
     private Map map = null;
@@ -158,18 +160,43 @@ public class BedWarsGame extends Game {
 
     @Override
     public void onPlayerDeath(Player p) {
+        for (ItemStack item : p.getInventory().getContents()) {
+            if (item != null && (item.getType() == Material.IRON_INGOT || item.getType() == Material.DIAMOND || item.getType() == Material.EMERALD)) {
+                p.getWorld().dropItemNaturally(p.getLocation(), item);
+            }
+        }
+
+        p.getInventory().clear();
+        p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD));
+
         if (p.getBedSpawnLocation() == null) {
             playerLeave(p);
+
+            int teamMembers = 0;
+            Team team = scoreboard.getEntryTeam(p.getName());
+
+            for (String member : team.getEntries()) {
+                if (players.contains(Bukkit.getPlayerExact(member))) {
+                    teamMembers ++;
+                }
+            }
+
+            scoreboard.resetScores(getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.YELLOW + (teamMembers + 1));
+            scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.YELLOW + teamMembers).setScore(3);
         } else {
             p.setVelocity(new Vector(0, 0, 0));
-            p.spigot().respawn();
+            p.setHealth(20);
+            p.setFallDistance(0);
+            p.teleport(p.getBedSpawnLocation());
         }
     }
 
+    private boolean hasDroppedStartingIron = false;
     public void ironTicker() {
         Bukkit.getScheduler().scheduleSyncDelayedTask(minigame, () -> {
             if (!players.isEmpty()) {
-                getSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(rotate(map.getIronVector(), bedwars.getAngle(location))).add(0.5, 0, 0.5), new ItemStack(Material.IRON_INGOT)));
+                getSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(rotate(map.getIronVector(), bedwars.getAngle(location))).add(0.5, 0, 0.5), new ItemStack(Material.IRON_INGOT, hasDroppedStartingIron ? 1 : 10)));
+                hasDroppedStartingIron = true;
                 ironTicker();
             }
         }, 20 * 2);

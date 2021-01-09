@@ -8,6 +8,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,8 +16,10 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
@@ -97,8 +100,41 @@ public class BedWars extends Minigame implements Listener {
         }
     }
 
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (e.getInventory().getHolder() instanceof Shop) {
+            ((Shop) e.getInventory().getHolder()).onClick(e);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerInteractAtEntity(PlayerInteractEntityEvent e) {
+        Game g = MG.core().getGame(e.getPlayer());
+        if (g instanceof BedWarsGame) {
+            BedWarsGame game = (BedWarsGame) g;
+            if (e.getRightClicked() instanceof Villager) {
+                e.getPlayer().openInventory(new ItemsShop(game.playerColours.get(e.getPlayer())).getInventory());
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerDropItem(PlayerDropItemEvent e) {
+        Game g = MG.core().getGame(e.getPlayer());
+        if (g instanceof BedWarsGame) {
+            if (e.getItemDrop().getItemStack().getType() != Material.IRON_INGOT
+                    && e.getItemDrop().getItemStack().getType() != Material.DIAMOND
+                    && e.getItemDrop().getItemStack().getType() != Material.EMERALD) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
     private void onBedBreak(BedWarsGame game, Player player, Block block) {
         Team bedTeam = null;
+
+        int count = 0;
 
         for (Player p : game.players) {
             if (p.getBedSpawnLocation() != null
@@ -106,12 +142,16 @@ public class BedWars extends Minigame implements Listener {
                     && p.getBedSpawnLocation().distanceSquared(block.getLocation()) < 5) {
                 bedTeam = game.scoreboard.getEntryTeam(p.getName());
                 p.sendMessage(ChatColor.BOLD + "Your bed has been destroyed!!");
+                count ++;
             }
         }
 
         if (bedTeam != null) {
             Team team = game.scoreboard.getEntryTeam(player.getName());
             game.broadcast(team.getPrefix() + player.getName() + ChatColor.GOLD + " has broken " + game.getTeamName(bedTeam) + "'s bed" + ChatColor.GOLD + "!");
+
+            game.scoreboard.resetScores(game.getTeamName(bedTeam) + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤");
+            game.scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(game.getTeamName(bedTeam) + ChatColor.WHITE + ": " + ChatColor.YELLOW + count).setScore(3);
         }
 
         setBedToAir(block);
@@ -203,6 +243,10 @@ public class BedWars extends Minigame implements Listener {
             player.sendMessage("Destroy the other player's beds to stop them from respawning!");
             player.sendMessage("Buy gear from the villagers with iron and diamonds!");
 
+            player.getInventory().addItem(new ItemStack(Material.WOOD_SWORD));
+            player.getEquipment().setChestplate(dye(Material.LEATHER_CHESTPLATE, color));
+            player.getEquipment().setLeggings(dye(Material.LEATHER_LEGGINGS, color));
+
             Team team = g.scoreboard.getTeam(g.getColorName(color));
             if (team == null) {
                 team = g.scoreboard.registerNewTeam(g.getColorName(color));
@@ -220,6 +264,8 @@ public class BedWars extends Minigame implements Listener {
             }) {
                 g.beds.put(bed, new ColouredBed(bed, colorData));
             }
+
+            g.playerColours.put(player, (short) colorData);
         }
 
         for (Team team : g.scoreboard.getTeams()) {
@@ -239,6 +285,53 @@ public class BedWars extends Minigame implements Listener {
         g.diamondTicker();
         g.emeraldTicker();
         g.spawnVillagers();
+    }
+
+    private ItemStack dye(Material material, ChatColor chatColor) {
+        ItemStack item = new ItemStack(material);
+        LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
+        meta.setColor(translateChatColorToColor(chatColor));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public static Color translateChatColorToColor(ChatColor chatColor) {
+        switch (chatColor) {
+            case AQUA:
+                return Color.AQUA;
+            case BLACK:
+                return Color.BLACK;
+            case BLUE:
+                return Color.BLUE;
+            case DARK_AQUA:
+                return Color.BLUE;
+            case DARK_BLUE:
+                return Color.BLUE;
+            case DARK_GRAY:
+                return Color.GRAY;
+            case DARK_GREEN:
+                return Color.GREEN;
+            case DARK_PURPLE:
+                return Color.PURPLE;
+            case DARK_RED:
+                return Color.RED;
+            case GOLD:
+                return Color.YELLOW;
+            case GRAY:
+                return Color.GRAY;
+            case GREEN:
+                return Color.GREEN;
+            case LIGHT_PURPLE:
+                return Color.PURPLE;
+            case RED:
+                return Color.RED;
+            case WHITE:
+                return Color.WHITE;
+            case YELLOW:
+                return Color.YELLOW;
+            default:
+                return null;
+        }
     }
 
     @Override
