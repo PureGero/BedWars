@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
@@ -47,6 +48,7 @@ public class BedWarsGame extends Game {
     HashMap<Block, ColouredBed> beds = new HashMap<>();
     HashSet<Block> playerBlocks = new HashSet<>();
     HashMap<Player, Short> playerColours = new HashMap<>();
+    HashMap<Team, HashMap<Enchantment, Integer>> enchantments = new HashMap<>();
     private int teamSize = 1;
     private BedWars bedwars;
     private Map map = null;
@@ -168,6 +170,7 @@ public class BedWarsGame extends Game {
 
         p.getInventory().clear();
         p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD));
+        UpgradesShop.updateEnchants(p);
 
         if (p.getBedSpawnLocation() == null) {
             playerLeave(p);

@@ -16,6 +16,7 @@ public class ShopItem {
     public ShopItem(ItemStack item, ItemStack cost) {
         this(item, cost, player -> {
             player.getInventory().addItem(item);
+            UpgradesShop.updateEnchants(player);
             return true;
         });
     }

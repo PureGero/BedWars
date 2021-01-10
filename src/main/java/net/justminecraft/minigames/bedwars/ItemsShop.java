@@ -46,6 +46,8 @@ public class ItemsShop extends Shop {
             player.getInventory().setItem(slot, new ItemStack(sword));
         }
 
+        UpgradesShop.updateEnchants(player);
+
         return true;
     }
 
@@ -61,6 +63,8 @@ public class ItemsShop extends Shop {
         player.getEquipment().setChestplate(new ItemStack(Material.valueOf(type + "_CHESTPLATE")));
         player.getEquipment().setLeggings(new ItemStack(Material.valueOf(type + "_LEGGINGS")));
         player.getEquipment().setBoots(new ItemStack(Material.valueOf(type + "_BOOTS")));
+
+        UpgradesShop.updateEnchants(player);
 
         return true;
     }

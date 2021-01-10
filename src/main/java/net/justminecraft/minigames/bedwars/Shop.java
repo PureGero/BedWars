@@ -10,6 +10,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -35,10 +36,13 @@ public class Shop implements InventoryHolder {
 
         ItemStack clickable = new ItemStack(item.getItem());
         ItemMeta meta = clickable.getItemMeta();
-        meta.setLore(Arrays.asList(
+        ArrayList<String> lore = new ArrayList<>();
+        if (meta.getLore() != null) lore.addAll(meta.getLore());
+        lore.addAll(Arrays.asList(
                 "",
                 ChatColor.GOLD + "Cost: " + item.getCost().getAmount() + " " + readable(item.getCost().getType().name()) + (item.getCost().getAmount() == 1 ? "" : "s")
         ));
+        meta.setLore(lore);
         clickable.setItemMeta(meta);
         inventory.setItem(i, clickable);
 
