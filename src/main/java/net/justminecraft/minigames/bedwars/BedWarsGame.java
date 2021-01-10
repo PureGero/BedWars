@@ -221,27 +221,16 @@ public class BedWarsGame extends Game {
     }
 
     public void spawnVillagers() {
-        List<Integer> colors = getColorData();
         getSpawnLocations().forEach(location -> {
-            int color = colors.remove(0);
-
             Villager villager = location.getWorld().spawn(location.clone().add(0.5, 0, 0.5).add(rotate(map.getShopVector(), bedwars.getAngle(location))), Villager.class);
             villager.setProfession(Villager.Profession.BLACKSMITH);
-            VillagerTradeApi.clearTrades(villager);
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.IRON_INGOT), null, new ItemStack(Material.WOOL, 16, (short) color)));
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.DIAMOND), null, new ItemStack(Material.STAINED_CLAY, 8, (short) color)));
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.IRON_INGOT, 10), null, new ItemStack(Material.SHEARS)));
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.IRON_INGOT, 10), null, new ItemStack(Material.IRON_PICKAXE)));
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.DIAMOND, 10), null, new ItemStack(Material.DIAMOND_PICKAXE)));
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.DIAMOND, 2), null, new ItemStack(Material.ENDER_PEARL)));
+            villager.setCustomName("Items Shop");
+            villager.setCustomNameVisible(true);
 
             villager = location.getWorld().spawn(location.clone().add(0.5, 0, 0.5).add(rotate(map.getUpgradeVector(), bedwars.getAngle(location))), Villager.class);
-            villager.setProfession(Villager.Profession.BLACKSMITH);
-            VillagerTradeApi.clearTrades(villager);
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.IRON_INGOT, 6), null, new ItemStack(Material.IRON_SWORD)));
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.DIAMOND, 4), null, new ItemStack(Material.DIAMOND_SWORD)));
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.IRON_INGOT, 6), null, new ItemStack(Material.IRON_CHESTPLATE)));
-            VillagerTradeApi.addTrade(villager, new VillagerTrade(new ItemStack(Material.DIAMOND, 4), null, new ItemStack(Material.DIAMOND_CHESTPLATE)));
+            villager.setProfession(Villager.Profession.LIBRARIAN);
+            villager.setCustomName("Upgrades Shop");
+            villager.setCustomNameVisible(true);
         });
     }
 
