@@ -46,6 +46,7 @@ public class BedWarsGame extends Game {
 
     Scoreboard scoreboard;
     HashMap<Block, ColouredBed> beds = new HashMap<>();
+    HashMap<Team, Location> teamSpawnLocations = new HashMap<>();
     HashSet<Block> playerBlocks = new HashSet<>();
     HashMap<Player, Short> playerColours = new HashMap<>();
     HashMap<Team, HashMap<Enchantment, Integer>> enchantments = new HashMap<>();
@@ -175,17 +176,7 @@ public class BedWarsGame extends Game {
         if (p.getBedSpawnLocation() == null) {
             playerLeave(p);
 
-            int teamMembers = 0;
-            Team team = scoreboard.getEntryTeam(p.getName());
-
-            for (String member : team.getEntries()) {
-                if (players.contains(Bukkit.getPlayerExact(member))) {
-                    teamMembers ++;
-                }
-            }
-
-            scoreboard.resetScores(getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.YELLOW + (teamMembers + 1));
-            scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.YELLOW + teamMembers).setScore(3);
+            updateScore(scoreboard.getEntryTeam(p.getName()));
         } else {
             p.setVelocity(new Vector(0, 0, 0));
             p.setHealth(20);
@@ -251,5 +242,24 @@ public class BedWarsGame extends Game {
                 vector.getY(),
                 -Math.sin(radians) * vector.getX() + Math.cos(radians) * vector.getZ()
         );
+    }
+
+    public void updateScore(Team team) {
+        int teamMembers = 0;
+
+        for (String member : team.getEntries()) {
+            if (players.contains(Bukkit.getPlayerExact(member))) {
+                teamMembers ++;
+            }
+        }
+
+        scoreboard.resetScores(getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤");
+        scoreboard.resetScores(getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.YELLOW + (teamMembers + 1));
+
+        if (teamMembers == 0) {
+            scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(getTeamName(team) + ChatColor.RED + ": " + ChatColor.RED + "✗").setScore(3);
+        } else {
+            scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.YELLOW + teamMembers).setScore(3);
+        }
     }
 }

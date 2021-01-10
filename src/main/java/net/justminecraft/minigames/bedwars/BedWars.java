@@ -25,6 +25,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
 public class BedWars extends Minigame implements Listener {
@@ -138,24 +139,24 @@ public class BedWars extends Minigame implements Listener {
     private void onBedBreak(BedWarsGame game, Player player, Block block) {
         Team bedTeam = null;
 
-        int count = 0;
-
-        for (Player p : game.players) {
-            if (p.getBedSpawnLocation() != null
-                    && p.getBedSpawnLocation().getWorld().equals(block.getWorld())
-                    && p.getBedSpawnLocation().distanceSquared(block.getLocation()) < 5) {
-                bedTeam = game.scoreboard.getEntryTeam(p.getName());
-                p.sendMessage(ChatColor.BOLD + "Your bed has been destroyed!!");
-                count ++;
+        for (HashMap.Entry<Team, Location> entry : game.teamSpawnLocations.entrySet()) {
+            if (entry.getValue().distanceSquared(block.getLocation()) < 16) {
+                bedTeam = entry.getKey();
             }
         }
 
         if (bedTeam != null) {
+            for (String member : bedTeam.getEntries()) {
+                Player p = Bukkit.getPlayerExact(member);
+                if (game.players.contains(p)) {
+                    p.sendMessage(ChatColor.BOLD + "Your bed has been destroyed!!");
+                }
+            }
+
             Team team = game.scoreboard.getEntryTeam(player.getName());
             game.broadcast(team.getPrefix() + player.getName() + ChatColor.GOLD + " has broken " + game.getTeamName(bedTeam) + "'s bed" + ChatColor.GOLD + "!");
 
-            game.scoreboard.resetScores(game.getTeamName(bedTeam) + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤");
-            game.scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(game.getTeamName(bedTeam) + ChatColor.WHITE + ": " + ChatColor.YELLOW + count).setScore(3);
+            game.updateScore(bedTeam);
         }
 
         setBedToAir(block);
@@ -257,6 +258,7 @@ public class BedWars extends Minigame implements Listener {
                 team.setPrefix(color.toString());
                 team.setAllowFriendlyFire(false);
                 team.setCanSeeFriendlyInvisibles(true);
+                g.teamSpawnLocations.put(team, spawnLocation);
             }
 
             player.setScoreboard(g.scoreboard);
