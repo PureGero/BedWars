@@ -41,7 +41,7 @@ public class UpgradesShop extends Shop {
     private ItemStack upgrade(Material material, Enchantment enchantment, String name, int level) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.addEnchant(enchantment, 1, true);
+        meta.addEnchant(enchantment, level + 1, true);
         meta.setDisplayName(name);
         meta.setLore(Arrays.asList(
                 "",

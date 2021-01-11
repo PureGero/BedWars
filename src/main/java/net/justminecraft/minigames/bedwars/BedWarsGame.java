@@ -1,7 +1,5 @@
 package net.justminecraft.minigames.bedwars;
 
-import com.gmail.val59000mc.villagerapi.VillagerTrade;
-import com.gmail.val59000mc.villagerapi.VillagerTradeApi;
 import net.justminecraft.minigames.minigamecore.Game;
 import net.justminecraft.minigames.minigamecore.Minigame;
 import org.bukkit.Bukkit;
