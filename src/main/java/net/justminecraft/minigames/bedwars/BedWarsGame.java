@@ -201,7 +201,7 @@ public class BedWarsGame extends Game {
                 hasDroppedStartingIron = true;
                 ironTicker();
             }
-        }, 20 * 5);
+        }, 20 * 4);
     }
 
     public void diamondTicker() {
@@ -210,7 +210,7 @@ public class BedWarsGame extends Game {
                 getDiamondSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(0.5, 2, 0.5), new ItemStack(Material.DIAMOND)));
                 diamondTicker();
             }
-        }, 20 * 20);
+        }, 20 * 15);
     }
 
     public void emeraldTicker() {
