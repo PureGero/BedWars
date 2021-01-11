@@ -196,12 +196,12 @@ public class BedWarsGame extends Game {
             if (!players.isEmpty()) {
                 teamSpawnLocations.forEach((team, location) -> location.getWorld().dropItem(
                         location.clone().add(rotate(map.getIronVector(), bedwars.getAngle(location))).add(0.5, 0, 0.5),
-                        new ItemStack(Material.IRON_INGOT, hasDroppedStartingIron ? enchantments.get(team).getOrDefault(Enchantment.LURE, 0) + 1 : 10)
+                        new ItemStack(Material.IRON_INGOT, hasDroppedStartingIron ? enchantments.get(team).getOrDefault(Enchantment.LURE, 0) + 1 : 8)
                 ));
                 hasDroppedStartingIron = true;
                 ironTicker();
             }
-        }, 20 * 2);
+        }, 20 * 5);
     }
 
     public void diamondTicker() {
@@ -210,7 +210,7 @@ public class BedWarsGame extends Game {
                 getDiamondSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(0.5, 2, 0.5), new ItemStack(Material.DIAMOND)));
                 diamondTicker();
             }
-        }, 20 * 10);
+        }, 20 * 20);
     }
 
     public void emeraldTicker() {
@@ -219,7 +219,7 @@ public class BedWarsGame extends Game {
                 getEmeraldSpawnLocations().forEach(location -> location.getWorld().dropItem(location, new ItemStack(Material.EMERALD)));
                 emeraldTicker();
             }
-        }, 20 * 15);
+        }, 20 * 30);
     }
 
     public void spawnVillagers() {
