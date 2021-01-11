@@ -7,7 +7,9 @@ import net.justminecraft.minigames.minigamecore.worldbuffer.WorldBuffer;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,7 +20,10 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -26,6 +31,8 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
@@ -83,7 +90,31 @@ public class BedWars extends Minigame implements Listener {
         Game g = MG.core().getGame(e.getPlayer());
         if (g instanceof BedWarsGame) {
             BedWarsGame game = (BedWarsGame) g;
-            game.playerBlocks.add(e.getBlock());
+            if (e.getBlock().getType() == Material.TNT) {
+                e.getBlock().setType(Material.AIR);
+                TNTPrimed tnt = e.getBlock().getWorld().spawn(e.getBlock().getLocation().add(0.5, 0.65, 0.5), TNTPrimed.class);
+                setSource(tnt, e.getPlayer());
+                tnt.setFuseTicks(40);
+            } else {
+                game.playerBlocks.add(e.getBlock());
+            }
+        }
+    }
+
+    private void setSource(TNTPrimed tnt, LivingEntity source) {
+        try {
+            Method tntGetHandle = tnt.getClass().getDeclaredMethod("getHandle");
+            Method entityGetHandle = source.getClass().getDeclaredMethod("getHandle");
+
+            Object craftTnt = tntGetHandle.invoke(tnt);
+            Object craftEntity = entityGetHandle.invoke(source);
+
+            Field sourceField = craftTnt.getClass().getDeclaredField("source");
+            sourceField.setAccessible(true);
+
+            sourceField.set(craftTnt, craftEntity);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
