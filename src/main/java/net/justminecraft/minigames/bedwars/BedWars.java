@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -205,12 +206,16 @@ public class BedWars extends Minigame implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent e) {
-        if (e.getEntity() instanceof Villager && e.getEntity().getLocation().getY() > 0) {
-            for (Game game : MG.core().getGames(this)) {
-                if (game.world == e.getEntity().getWorld()) {
-                    e.setCancelled(true);
-                }
-            }
+        if (e.getEntity() instanceof Villager && e.getEntity().getLocation().getY() > 0 && MG.core().getGame(e.getEntity().getWorld()) instanceof BedWarsGame) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent e) {
+        if (MG.core().getGame(e.getEntity().getWorld()) instanceof BedWarsGame) {
+            BedWarsGame game = (BedWarsGame) MG.core().getGame(e.getEntity().getWorld());
+            e.blockList().removeIf(block -> !game.playerBlocks.contains(block));
         }
     }
 
