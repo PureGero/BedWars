@@ -261,6 +261,7 @@ public class BedWars extends Minigame implements Listener {
 
         g.world.setDifficulty(Difficulty.PEACEFUL);
         g.world.setSpawnLocation(0, 64, 0);
+        g.world.setGameRuleValue("naturalRegeneration", "false");
 
         for (int x = -5; x < 5; x++) {
             for (int z = -5; z < 5; z++) {
