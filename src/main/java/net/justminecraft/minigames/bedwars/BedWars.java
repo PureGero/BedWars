@@ -115,7 +115,7 @@ public class BedWars extends Minigame implements Listener {
             BedWarsGame game = (BedWarsGame) g;
             if (e.getRightClicked() instanceof Villager) {
                 if (((Villager) e.getRightClicked()).getProfession() == Villager.Profession.LIBRARIAN) {
-                    e.getPlayer().openInventory(new UpgradesShop().getInventory());
+                    e.getPlayer().openInventory(new UpgradesShop(e.getPlayer()).getInventory());
                 } else {
                     e.getPlayer().openInventory(new ItemsShop(game.playerColours.get(e.getPlayer())).getInventory());
                 }
@@ -275,6 +275,7 @@ public class BedWars extends Minigame implements Listener {
         }
 
         for (Team team : g.scoreboard.getTeams()) {
+            g.enchantments.put(team, new HashMap<>());
             bedAlive.getScore(g.getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤").setScore(3);
         }
 

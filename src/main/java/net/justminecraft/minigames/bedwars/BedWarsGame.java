@@ -211,7 +211,7 @@ public class BedWarsGame extends Game {
                 getEmeraldSpawnLocations().forEach(location -> location.getWorld().dropItem(location, new ItemStack(Material.EMERALD)));
                 emeraldTicker();
             }
-        }, 20 * 10);
+        }, 20 * 15);
     }
 
     public void spawnVillagers() {

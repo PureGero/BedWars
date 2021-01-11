@@ -2,6 +2,7 @@ package net.justminecraft.minigames.bedwars;
 
 import net.justminecraft.minigames.minigamecore.Game;
 import net.justminecraft.minigames.minigamecore.MG;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -14,25 +15,39 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class UpgradesShop extends Shop {
-    public UpgradesShop() {
+    public UpgradesShop(Player player) {
         super("Upgrades Shop", 3 * 9);
 
-        setItem(10, new ShopItem(upgrade(Material.DIAMOND_SWORD, Enchantment.DAMAGE_ALL, "Sharpness"), emerald(2), player -> upgrade(player, Enchantment.DAMAGE_ALL)));
-        setItem(12, new ShopItem(upgrade(Material.DIAMOND_CHESTPLATE, Enchantment.PROTECTION_ENVIRONMENTAL, "Protection"), emerald(4), player -> upgrade(player, Enchantment.PROTECTION_ENVIRONMENTAL)));
-        setItem(14, new ShopItem(upgrade(Material.BOW, Enchantment.ARROW_KNOCKBACK, "Punch"), emerald(3), player -> upgrade(player, Enchantment.ARROW_KNOCKBACK)));
-        setItem(16, new ShopItem(upgrade(Material.FURNACE, Enchantment.LURE, "More Iron"), emerald(6), player -> upgrade(player, Enchantment.LURE)));
+        Game game = MG.core().getGame(player);
+        updateItems((BedWarsGame) game, player.getScoreboard().getEntryTeam(player.getName()));
     }
 
-    private ItemStack upgrade(Material material, Enchantment enchantment, String name) {
+    private void updateItems(BedWarsGame game, Team team) {
+        int level;
+
+        level = game.enchantments.get(team).getOrDefault(Enchantment.DAMAGE_ALL, 0);
+        setItem(10, new ShopItem(upgrade(Material.DIAMOND_SWORD, Enchantment.DAMAGE_ALL, "Sharpness", level), emerald(level * 2 + 2), player -> upgrade(player, Enchantment.DAMAGE_ALL)));
+
+        level = game.enchantments.get(team).getOrDefault(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
+        setItem(12, new ShopItem(upgrade(Material.DIAMOND_CHESTPLATE, Enchantment.PROTECTION_ENVIRONMENTAL, "Protection", level), emerald(level * 2 + 2), player -> upgrade(player, Enchantment.PROTECTION_ENVIRONMENTAL)));
+
+        level = game.enchantments.get(team).getOrDefault(Enchantment.ARROW_KNOCKBACK, 0);
+        setItem(14, new ShopItem(upgrade(Material.BOW, Enchantment.ARROW_KNOCKBACK, "Punch", level), emerald(level * 2 + 2), player -> upgrade(player, Enchantment.ARROW_KNOCKBACK)));
+
+        level = game.enchantments.get(team).getOrDefault(Enchantment.LURE, 0);
+        setItem(16, new ShopItem(upgrade(Material.FURNACE, Enchantment.LURE, "More Iron", level), emerald(level * 2 + 2), player -> upgrade(player, Enchantment.LURE)));
+    }
+
+    private ItemStack upgrade(Material material, Enchantment enchantment, String name, int level) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         meta.addEnchant(enchantment, 1, true);
         meta.setDisplayName(name);
         meta.setLore(Arrays.asList(
                 "",
-                name + " Tier I: X emeralds",
-                name + " Tier II: Y emeralds",
-                name + " Tier III: Z emeralds"
+                (level >= 1 ? ChatColor.GREEN : ChatColor.RED) + name + " Tier I: 2 emeralds",
+                (level >= 2 ? ChatColor.GREEN : ChatColor.RED) + name + " Tier II: 4 emeralds",
+                (level >= 3 ? ChatColor.GREEN : ChatColor.RED) + name + " Tier III: 6 emeralds"
         ));
         item.setItemMeta(meta);
         return item;
@@ -50,6 +65,8 @@ public class UpgradesShop extends Shop {
             enchants.put(enchantment, enchants.getOrDefault(enchantment, 0) + 1);
 
             g.players.forEach(UpgradesShop::updateEnchants);
+
+            updateItems((BedWarsGame) g, team);
 
             return true;
         }
