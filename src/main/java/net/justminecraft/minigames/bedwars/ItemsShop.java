@@ -23,8 +23,8 @@ public class ItemsShop extends Shop {
         setItem(14, new ShopItem(new ItemStack(Material.TNT), iron(5)));
         setItem(23, new ShopItem(new ItemStack(Material.FLINT_AND_STEEL), diamond(3)));
 
-        setItem(15, new ShopItem(new ItemStack(Material.ARROW, 16), iron(4)));
-        setItem(24, new ShopItem(new ItemStack(Material.BOW), diamond(2)));
+        setItem(15, new ShopItem(new ItemStack(Material.ARROW, 8), iron(6)));
+        setItem(24, new ShopItem(new ItemStack(Material.BOW), diamond(10)));
 
         setItem(16, new ShopItem(new ItemStack(Material.LADDER, 4), iron(4)));
         setItem(25, new ShopItem(new ItemStack(Material.ENDER_PEARL), diamond(4)));
