@@ -2,10 +2,7 @@ package net.justminecraft.minigames.bedwars;
 
 import net.justminecraft.minigames.minigamecore.Game;
 import net.justminecraft.minigames.minigamecore.Minigame;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -47,6 +44,7 @@ public class BedWarsGame extends Game {
     Scoreboard scoreboard;
     HashMap<Block, ColouredBed> beds = new HashMap<>();
     HashMap<Team, Location> teamSpawnLocations = new HashMap<>();
+    HashMap<Team, Block> teamBeds = new HashMap<>();
     HashSet<Block> playerBlocks = new HashSet<>();
     HashMap<Player, Short> playerColours = new HashMap<>();
     HashMap<Team, HashMap<Enchantment, Integer>> enchantments = new HashMap<>();
@@ -173,15 +171,22 @@ public class BedWarsGame extends Game {
         p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD));
         UpgradesShop.updateEnchants(p);
 
-        if (p.getBedSpawnLocation() == null) {
+        Team team = scoreboard.getEntryTeam(p.getName());
+
+        if (teamBeds.get(team).getType() != Material.BED_BLOCK) {
             playerLeave(p);
 
-            updateScore(scoreboard.getEntryTeam(p.getName()));
+            updateScore(team);
         } else {
             p.setVelocity(new Vector(0, 0, 0));
             p.setHealth(20);
             p.setFallDistance(0);
-            p.teleport(p.getBedSpawnLocation());
+            p.setGameMode(GameMode.SPECTATOR);
+            new PlayerRespawn((BedWars) minigame, p, teamBeds.get(team));
+
+            if (p.getLocation().getY() < 30) {
+                p.teleport(new Location(p.getWorld(), 20, 90, 20, 135, 45));
+            }
         }
     }
 

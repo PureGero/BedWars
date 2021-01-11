@@ -289,7 +289,6 @@ public class BedWars extends Minigame implements Listener {
             spawnLocation.setYaw(getAngleDegrees(spawnLocation));
 
             player.teleport(spawnLocation.clone().add(0.5, 0, 0.5));
-            player.setBedSpawnLocation(spawnLocation.clone().add(-Math.sin(getAngle(spawnLocation)) * 2 + 0.5, 0, Math.cos(getAngle(spawnLocation)) * 2 + 0.5));
             player.playSound(player.getLocation(), Sound.LEVEL_UP, 2, 1);
             g.minigame.message(player, "Game has started!");
             player.sendMessage("Destroy the other player's beds to stop them from respawning!");
@@ -306,6 +305,7 @@ public class BedWars extends Minigame implements Listener {
                 team.setAllowFriendlyFire(false);
                 team.setCanSeeFriendlyInvisibles(true);
                 g.teamSpawnLocations.put(team, spawnLocation);
+                g.teamBeds.put(team, spawnLocation.clone().add(-Math.sin(getAngle(spawnLocation)) * 2 + 0.5, 0, Math.cos(getAngle(spawnLocation)) * 2 + 0.5).getBlock());
             }
 
             player.setScoreboard(g.scoreboard);
