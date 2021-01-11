@@ -11,6 +11,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -216,16 +218,22 @@ public class BedWarsGame extends Game {
     }
 
     public void spawnVillagers() {
-        getSpawnLocations().forEach(location -> {
-            Villager villager = location.getWorld().spawn(location.clone().add(0.5, 0, 0.5).add(rotate(map.getShopVector(), bedwars.getAngle(location))), Villager.class);
+        getSpawnLocations().forEach(spawnLocation -> {
+            Location location = spawnLocation.clone().add(0.5, 0, 0.5).add(rotate(map.getShopVector(), bedwars.getAngle(spawnLocation)));
+            location.setYaw((float) (bedwars.getAngleDegrees(spawnLocation) - 90));
+            Villager villager = location.getWorld().spawn(location, Villager.class);
             villager.setProfession(Villager.Profession.BLACKSMITH);
             villager.setCustomName("Items Shop");
             villager.setCustomNameVisible(true);
+            villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60 * 60 * 20, 127, true, false));
 
-            villager = location.getWorld().spawn(location.clone().add(0.5, 0, 0.5).add(rotate(map.getUpgradeVector(), bedwars.getAngle(location))), Villager.class);
+            location = spawnLocation.clone().add(0.5, 0, 0.5).add(rotate(map.getUpgradeVector(), bedwars.getAngle(spawnLocation)));
+            location.setYaw((float) (bedwars.getAngleDegrees(spawnLocation) + 90));
+            villager = location.getWorld().spawn(location, Villager.class);
             villager.setProfession(Villager.Profession.LIBRARIAN);
             villager.setCustomName("Upgrades Shop");
             villager.setCustomNameVisible(true);
+            villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60 * 60 * 20, 127, true, false));
         });
     }
 

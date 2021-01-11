@@ -203,6 +203,17 @@ public class BedWars extends Minigame implements Listener {
         }
     }
 
+    @EventHandler
+    public void onEntityDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Villager && e.getEntity().getLocation().getY() > 0) {
+            for (Game game : MG.core().getGames(this)) {
+                if (game.world == e.getEntity().getWorld()) {
+                    e.setCancelled(true);
+                }
+            }
+        }
+    }
+
     @Override
     public Game newGame() {
         return new BedWarsGame(this);
@@ -398,7 +409,7 @@ public class BedWars extends Minigame implements Listener {
         m.placeSchematic(w, l, "island", getAngleDegrees(l));
     }
 
-    private int getAngleDegrees(Location location) {
+    public int getAngleDegrees(Location location) {
         double angle = Math.toDegrees(Math.atan2(location.getBlockX(), -location.getBlockZ()));
         if (angle < -135) {
             return 180;
