@@ -187,7 +187,10 @@ public class BedWarsGame extends Game {
     public void ironTicker() {
         Bukkit.getScheduler().scheduleSyncDelayedTask(minigame, () -> {
             if (!players.isEmpty()) {
-                getSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(rotate(map.getIronVector(), bedwars.getAngle(location))).add(0.5, 0, 0.5), new ItemStack(Material.IRON_INGOT, hasDroppedStartingIron ? 1 : 10)));
+                teamSpawnLocations.forEach((team, location) -> location.getWorld().dropItem(
+                        location.clone().add(rotate(map.getIronVector(), bedwars.getAngle(location))).add(0.5, 0, 0.5),
+                        new ItemStack(Material.IRON_INGOT, hasDroppedStartingIron ? enchantments.get(team).getOrDefault(Enchantment.LURE, 0) + 1 : 10)
+                ));
                 hasDroppedStartingIron = true;
                 ironTicker();
             }
