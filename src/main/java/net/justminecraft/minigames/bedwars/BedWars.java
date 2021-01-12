@@ -46,6 +46,7 @@ public class BedWars extends Minigame implements Listener {
 
         MG.core().registerMinigame(this);
         getServer().getPluginManager().registerEvents(this, this);
+        new Regen(this);
         getLogger().info("BedWars enabled");
     }
 
