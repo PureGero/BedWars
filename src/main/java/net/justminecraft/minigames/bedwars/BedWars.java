@@ -1,16 +1,11 @@
 package net.justminecraft.minigames.bedwars;
 
-import net.justminecraft.minigames.minigamecore.Game;
-import net.justminecraft.minigames.minigamecore.MG;
-import net.justminecraft.minigames.minigamecore.Minigame;
+import net.justminecraft.minigames.minigamecore.*;
 import net.justminecraft.minigames.minigamecore.worldbuffer.WorldBuffer;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.TNTPrimed;
-import org.bukkit.entity.Villager;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -34,12 +29,16 @@ import org.bukkit.scoreboard.Team;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class BedWars extends Minigame implements Listener {
 
     public static File DATA_FOLDER;
+
+    private static HashMap<Player, TeamPreference> teamsPreference = new HashMap<>();
+    private static HashMap<TeamPreference, Location> preferenceArmorStandLocations = new HashMap<>();
 
     public void onEnable() {
         DATA_FOLDER = getDataFolder();
@@ -56,7 +55,7 @@ public class BedWars extends Minigame implements Listener {
 
     @Override
     public int getMaxPlayers() {
-        return 9;
+        return 32;
     }
 
     @Override
@@ -259,6 +258,75 @@ public class BedWars extends Minigame implements Listener {
         }
     }
 
+    @EventHandler
+    public void onPreferenceSelected(PlayerInteractEntityEvent e) {
+        if (e.getRightClicked().getCustomName() != null) {
+            TeamPreference preference = null;
+            if (e.getRightClicked().getCustomName().equalsIgnoreCase("solo")) {
+                preference = TeamPreference.SOLO;
+            } else if (e.getRightClicked().getCustomName().equalsIgnoreCase("teams")) {
+                preference = TeamPreference.TEAM;
+            }
+
+            if (preference != null) {
+                e.getPlayer().sendMessage(ChatColor.GREEN + "Set your preference to " + e.getRightClicked().getCustomName());
+                teamsPreference.put(e.getPlayer(), preference);
+                preferenceArmorStandLocations.put(preference, e.getRightClicked().getLocation());
+
+                if (MG.core().getQueue(e.getPlayer()) == null) {
+                    MG.core().joinMinigameQueue(e.getPlayer(), getMinigameName());
+                }
+                updatePreferences();
+
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onQueueJoin(QueueJoinEvent e) {
+        if (e.getQueue() instanceof BedWars) {
+            updatePreferences();
+        }
+    }
+
+    @EventHandler
+    public void onQueueJoin(QueueLeaveEvent e) {
+        if (e.getQueue() instanceof BedWars) {
+            updatePreferences();
+        }
+    }
+
+    private void updatePreferences() {
+        preferenceArmorStandLocations.forEach((preference, location) -> {
+            ArmorStand armorStand = null;
+
+            for (Entity e : location.getWorld().getNearbyEntities(location, 1, 1, 1)) {
+                if (e instanceof ArmorStand) {
+                    armorStand = (ArmorStand) e;
+                }
+            }
+
+            if (armorStand == null) {
+                armorStand = location.getWorld().spawn(location, ArmorStand.class);
+            }
+
+            int count = 0;
+
+            for (Player player : MG.core().getQueue(this).players) {
+                if (teamsPreference.get(player) == preference) {
+                    count ++;
+                }
+            }
+
+            armorStand.setCustomName(count + " players prefer");
+            armorStand.setCustomNameVisible(true);
+            armorStand.setVisible(false);
+            armorStand.setGravity(false);
+            armorStand.teleport(location.clone().add(0, 0.4, 0));
+        });
+    }
+
     @Override
     public Game newGame() {
         return new BedWarsGame(this);
@@ -290,6 +358,8 @@ public class BedWars extends Minigame implements Listener {
         bedAlive.getScore(" ").setScore(2);
         bedAlive.getScore(ChatColor.YELLOW + "justminecraft.net").setScore(1);
 
+        List<Player> playersToAddToTeam = new ArrayList<>(g.players);
+
         for (int i = 0; i < g.teamCount; i++) {
             Location spawnLocation = spawnLocations.remove(0);
             ChatColor color = colors.remove(0);
@@ -314,8 +384,15 @@ public class BedWars extends Minigame implements Listener {
                 g.beds.put(bed, new ColouredBed(bed, colorData));
             }
 
-            // TODO Add players based on g.teamSize
-            team.addEntry(g.players.get(i).getName());
+            int playersPerTeam = playersToAddToTeam.size() / (g.teamCount - i);
+            if (playersToAddToTeam.size() == playersPerTeam) {
+                playersToAddToTeam.forEach(player -> team.addEntry(player.getName()));
+            } else {
+                new PlayerGrouper(playersToAddToTeam, playersPerTeam, player -> {
+                    team.addEntry(player.getName());
+                    playersToAddToTeam.remove(player);
+                });
+            }
 
             bedAlive.getScore(g.getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤").setScore(3);
         }
@@ -354,6 +431,8 @@ public class BedWars extends Minigame implements Listener {
         g.diamondTicker();
         g.emeraldTicker();
         g.spawnVillagers();
+
+        updatePreferences();
     }
 
     private ItemStack dye(Material material, ChatColor chatColor) {
@@ -414,8 +493,33 @@ public class BedWars extends Minigame implements Listener {
         g.disableHunger = true;
         g.disablePvP = false;
 
-        // TODO Calculate g.teamSize
-        g.teamCount = g.players.size() / g.teamSize;
+        int soloPreferences = 0;
+        int teamPreferences = 0;
+
+        for (Player p : g.players) {
+            TeamPreference preference = teamsPreference.get(p);
+            if (preference == TeamPreference.SOLO) {
+                soloPreferences++;
+            } else if (preference == TeamPreference.TEAM) {
+                teamPreferences++;
+            }
+        }
+
+        int minTeamSize = g.teamSize = (int) Math.ceil(g.players.size() / 8.0);
+
+        if (g.players.size() >= 4 && teamPreferences > 0 && Math.random() * (soloPreferences + teamPreferences) < teamPreferences) {
+            // Teams is preferred
+            minTeamSize = 2;
+        }
+
+        for (int i = minTeamSize; i < g.players.size(); i++) {
+            if (g.players.size() % i == 0) {
+                g.teamSize = i;
+                break;
+            }
+        }
+
+        g.teamCount = (int) Math.ceil((double) g.players.size() / g.teamSize);
 
         Map m = g.randomMap();
 
