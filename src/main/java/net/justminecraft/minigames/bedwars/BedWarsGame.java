@@ -45,10 +45,13 @@ public class BedWarsGame extends Game {
     HashMap<Block, ColouredBed> beds = new HashMap<>();
     HashMap<Team, Location> teamSpawnLocations = new HashMap<>();
     HashMap<Team, Block> teamBeds = new HashMap<>();
+    HashMap<Team, ChatColor> teamColors = new HashMap<>();
+    HashMap<Team, Short> teamColorDatas = new HashMap<>();
     HashSet<Block> playerBlocks = new HashSet<>();
     HashMap<Player, Short> playerColours = new HashMap<>();
     HashMap<Team, HashMap<Enchantment, Integer>> enchantments = new HashMap<>();
-    private int teamSize = 1;
+    int teamSize = 1;
+    int teamCount;
     private BedWars bedwars;
     private Map map = null;
 
@@ -96,8 +99,8 @@ public class BedWarsGame extends Game {
     public List<Location> getDiamondSpawnLocations() {
         List<Location> locations = new ArrayList<>();
 
-        for (int i = 0; i < players.size(); i++) {
-            double a = Math.PI*2 * (i * 2 + 1) / (players.size() * 2);
+        for (int i = 0; i < teamCount; i++) {
+            double a = Math.PI*2 * (i * 2 + 1) / (teamCount * 2);
             int x = (int) (Math.sin(a) * (map.getDistance() - 5));
             int z = (int) (-Math.cos(a) * (map.getDistance() - 5));
             locations.add(new Location(world, x, 64, z));
@@ -109,8 +112,8 @@ public class BedWarsGame extends Game {
     public List<Location> getSpawnLocations() {
         List<Location> locations = new ArrayList<>();
 
-        for (int i = 0; i < players.size(); i++) {
-            double a = Math.PI*2 * i / players.size();
+        for (int i = 0; i < teamCount; i++) {
+            double a = Math.PI*2 * i / teamCount;
             int x = (int) (Math.sin(a) * map.getDistance());
             int z = (int) (-Math.cos(a) * map.getDistance());
             if (x != 0 && z != 0) {
@@ -126,9 +129,9 @@ public class BedWarsGame extends Game {
     public List<Location> getIslandSpawnLocations() {
         List<Location> locations = new ArrayList<>();
 
-        if (players.size() == 1 || players.size() == 2 || players.size() == 4) {
+        if (teamCount == 1 || teamCount == 2 ||teamCount == 4) {
             for (int i = 0; i < 16; i++) {
-                if (i % (16 / players.size() / 2) == 0) {
+                if (i % (16 / teamCount / 2) == 0) {
                     continue;
                 }
                 double a = Math.PI*2 * i / 16;
@@ -136,9 +139,9 @@ public class BedWarsGame extends Game {
                 int z = (int) (-Math.cos(a) * (map.getDistance() - 5));
                 locations.add(new Location(world, x, 64, z));
             }
-        } else if (players.size() == 3) {
+        } else if (teamCount == 3) {
             for (int i = 0; i < 12; i++) {
-                if (i % (12 / players.size() / 2) == 0) {
+                if (i % (12 / teamCount / 2) == 0) {
                     continue;
                 }
                 double a = Math.PI*2 * i / 12;

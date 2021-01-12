@@ -290,36 +290,22 @@ public class BedWars extends Minigame implements Listener {
         bedAlive.getScore(" ").setScore(2);
         bedAlive.getScore(ChatColor.YELLOW + "justminecraft.net").setScore(1);
 
-        for (Player player : g.players) {
-            MG.resetPlayer(player);
+        for (int i = 0; i < g.teamCount; i++) {
             Location spawnLocation = spawnLocations.remove(0);
             ChatColor color = colors.remove(0);
             int colorData = colorDatas.remove(0);
 
             spawnLocation.setYaw(getAngleDegrees(spawnLocation));
 
-            player.teleport(spawnLocation.clone().add(0.5, 0, 0.5));
-            player.playSound(player.getLocation(), Sound.LEVEL_UP, 2, 1);
-            g.minigame.message(player, "Game has started!");
-            player.sendMessage("Destroy the other player's beds to stop them from respawning!");
-            player.sendMessage("Buy gear from the villagers with iron and diamonds!");
-
-            player.getInventory().addItem(new ItemStack(Material.WOOD_SWORD));
-            player.getEquipment().setChestplate(dye(Material.LEATHER_CHESTPLATE, color));
-            player.getEquipment().setLeggings(dye(Material.LEATHER_LEGGINGS, color));
-
-            Team team = g.scoreboard.getTeam(g.getColorName(color));
-            if (team == null) {
-                team = g.scoreboard.registerNewTeam(g.getColorName(color));
-                team.setPrefix(color.toString());
-                team.setAllowFriendlyFire(false);
-                team.setCanSeeFriendlyInvisibles(true);
-                g.teamSpawnLocations.put(team, spawnLocation);
-                g.teamBeds.put(team, spawnLocation.clone().add(-Math.sin(getAngle(spawnLocation)) * 2 + 0.5, 0, Math.cos(getAngle(spawnLocation)) * 2 + 0.5).getBlock());
-            }
-
-            player.setScoreboard(g.scoreboard);
-            team.addEntry(player.getName());
+            Team team = g.scoreboard.registerNewTeam(g.getColorName(color));
+            team.setPrefix(color.toString());
+            team.setAllowFriendlyFire(false);
+            team.setCanSeeFriendlyInvisibles(true);
+            g.teamSpawnLocations.put(team, spawnLocation);
+            g.teamBeds.put(team, spawnLocation.clone().add(-Math.sin(getAngle(spawnLocation)) * 2 + 0.5, 0, Math.cos(getAngle(spawnLocation)) * 2 + 0.5).getBlock());
+            g.teamColors.put(team, color);
+            g.teamColorDatas.put(team, (short) colorData);
+            g.enchantments.put(team, new HashMap<>());
 
             for (Block bed : new Block[] {
                     spawnLocation.getBlock().getRelative((int) -Math.sin(getAngle(spawnLocation)) * 2, 0, (int) Math.cos(getAngle(spawnLocation)) * 2),
@@ -328,12 +314,31 @@ public class BedWars extends Minigame implements Listener {
                 g.beds.put(bed, new ColouredBed(bed, colorData));
             }
 
-            g.playerColours.put(player, (short) colorData);
+            // TODO Add players based on g.teamSize
+            team.addEntry(g.players.get(i).getName());
+
+            bedAlive.getScore(g.getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤").setScore(3);
         }
 
-        for (Team team : g.scoreboard.getTeams()) {
-            g.enchantments.put(team, new HashMap<>());
-            bedAlive.getScore(g.getTeamName(team) + ChatColor.WHITE + ": " + ChatColor.GREEN + "❤").setScore(3);
+        for (Player player : g.players) {
+            Team team = g.scoreboard.getEntryTeam(player.getName());
+
+            MG.resetPlayer(player);
+
+            player.teleport(g.teamSpawnLocations.get(team).clone().add(0.5, 0, 0.5));
+            player.playSound(player.getLocation(), Sound.LEVEL_UP, 2, 1);
+            g.minigame.message(player, "Game has started!");
+            player.sendMessage("Destroy the other player's beds to stop them from respawning!");
+            player.sendMessage("Buy gear from the villagers with iron and diamonds!");
+
+            player.getInventory().addItem(new ItemStack(Material.WOOD_SWORD));
+            player.getEquipment().setChestplate(dye(Material.LEATHER_CHESTPLATE, g.teamColors.get(team)));
+            player.getEquipment().setLeggings(dye(Material.LEATHER_LEGGINGS, g.teamColors.get(team)));
+
+            player.setScoreboard(g.scoreboard);
+            team.addEntry(player.getName());
+
+            g.playerColours.put(player, g.teamColorDatas.get(team));
         }
 
         Bukkit.getScheduler().runTaskLater(this, () -> g.players.forEach(g::sendBeds), 20);
@@ -408,6 +413,9 @@ public class BedWars extends Minigame implements Listener {
         g.disableBlockPlacing = false;
         g.disableHunger = true;
         g.disablePvP = false;
+
+        // TODO Calculate g.teamSize
+        g.teamCount = g.players.size() / g.teamSize;
 
         Map m = g.randomMap();
 
