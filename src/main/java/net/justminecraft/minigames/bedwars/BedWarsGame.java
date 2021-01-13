@@ -193,6 +193,38 @@ public class BedWarsGame extends Game {
         }
     }
 
+    @Override
+    public boolean isGameOver() {
+        Team team = null;
+        for (Player player : players) {
+            Team team2 = scoreboard.getEntryTeam(player.getName());
+
+            if (team2 == null) {
+                continue;
+            }
+
+            if (team == null) {
+                team = team2;
+            } else if (!team.equals(team2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String getWinningTeamName() {
+        for (Player player : players) {
+            Team team = scoreboard.getEntryTeam(player.getName());
+
+            if (team != null) {
+                return getTeamName(team);
+            }
+        }
+
+        return "Unknown";
+    }
+
     private boolean hasDroppedStartingIron = false;
     public void ironTicker() {
         Bukkit.getScheduler().scheduleSyncDelayedTask(minigame, () -> {
