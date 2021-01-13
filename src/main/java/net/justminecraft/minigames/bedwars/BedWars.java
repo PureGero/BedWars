@@ -47,6 +47,54 @@ public class BedWars extends Minigame implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         new Regen(this);
         getLogger().info("BedWars enabled");
+
+        spawnTeamPreferenceVillages();
+    }
+
+//    private void noAI(EntityInsentient entity) {
+//        try {
+//            Field field = entity.goalSelector.getClass().getDeclaredField("b");
+//            field.setAccessible(true);
+//
+//            ((List<?>) field.get(entity.goalSelector)).clear();
+//        } catch(Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    private void spawnTeamPreferenceVillages() {
+//        Function<Villager, Runnable> setNoAiLater = v -> () -> ((CraftVillager) v).getHandle().k(true); // NoAI
+//        BiFunction<Entity, Location, Runnable> teleportLater = (e, l) -> () -> {
+//            ((CraftVillager) e).getHandle().setPositionRotation(138.5, 167, 389.5, 170, 0);
+//        };
+//
+//        Location location = new Location(Bukkit.getWorlds().get(0), 138.5, 167, 389.5, 170, 0);
+//        location.getWorld().getNearbyEntities(location, 1, 1, 1).forEach(entity -> {
+//            if (entity instanceof Villager) {
+//                entity.remove();
+//            }
+//        });
+//
+//        Villager villager = location.getWorld().spawn(location, Villager.class);
+//        villager.setProfession(Villager.Profession.BLACKSMITH);
+//        villager.setCustomName(ChatColor.GREEN + "Solo");
+//        villager.setCustomNameVisible(true);
+//        noAI(((CraftVillager) villager).getHandle());
+//        ((CraftVillager) villager).getHandle().setPositionRotation(138.5, 167, 389.5, 170, 0);
+//        Bukkit.getScheduler().runTaskTimer(this, teleportLater.apply(villager, location), 20, 20);
+//
+//        location = new Location(Bukkit.getWorlds().get(0), 134.5, 167, 389.5, -170, 0);
+//        location.getWorld().getNearbyEntities(location, 1, 1, 1).forEach(entity -> {
+//            if (entity instanceof Villager) {
+//                entity.remove();
+//            }
+//        });
+//
+//        villager = location.getWorld().spawn(location, Villager.class);
+//        villager.setProfession(Villager.Profession.LIBRARIAN);
+//        villager.setCustomName(ChatColor.AQUA + "Teams");
+//        villager.setCustomNameVisible(true);
+//        Bukkit.getScheduler().runTaskLater(this, setNoAiLater.apply(villager), 10);
     }
 
     public void onDisable() {
@@ -262,9 +310,9 @@ public class BedWars extends Minigame implements Listener {
     public void onPreferenceSelected(PlayerInteractEntityEvent e) {
         if (e.getRightClicked().getCustomName() != null) {
             TeamPreference preference = null;
-            if (e.getRightClicked().getCustomName().equalsIgnoreCase("solo")) {
+            if (e.getRightClicked().getCustomName().contains("Solo")) {
                 preference = TeamPreference.SOLO;
-            } else if (e.getRightClicked().getCustomName().equalsIgnoreCase("teams")) {
+            } else if (e.getRightClicked().getCustomName().contains("Teams")) {
                 preference = TeamPreference.TEAM;
             }
 
@@ -319,7 +367,7 @@ public class BedWars extends Minigame implements Listener {
                 }
             }
 
-            armorStand.setCustomName(count + " players prefer");
+            armorStand.setCustomName(ChatColor.RED.toString() + count + ChatColor.GOLD + " players prefer");
             armorStand.setCustomNameVisible(true);
             armorStand.setVisible(false);
             armorStand.setGravity(false);
