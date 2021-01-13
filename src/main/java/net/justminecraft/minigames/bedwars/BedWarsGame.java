@@ -263,7 +263,7 @@ public class BedWarsGame extends Game {
             location.setYaw((float) (bedwars.getAngleDegrees(spawnLocation) - 90));
             Villager villager = location.getWorld().spawn(location, Villager.class);
             villager.setProfession(Villager.Profession.BLACKSMITH);
-            villager.setCustomName("Items Shop");
+            villager.setCustomName(ChatColor.GOLD + "Items Shop");
             villager.setCustomNameVisible(true);
             villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60 * 60 * 20, 127, true, false));
 
@@ -271,7 +271,7 @@ public class BedWarsGame extends Game {
             location.setYaw((float) (bedwars.getAngleDegrees(spawnLocation) + 90));
             villager = location.getWorld().spawn(location, Villager.class);
             villager.setProfession(Villager.Profession.LIBRARIAN);
-            villager.setCustomName("Upgrades Shop");
+            villager.setCustomName(ChatColor.GREEN + "Upgrades Shop");
             villager.setCustomNameVisible(true);
             villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60 * 60 * 20, 127, true, false));
         });
