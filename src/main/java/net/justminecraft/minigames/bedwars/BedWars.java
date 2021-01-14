@@ -484,6 +484,8 @@ public class BedWars extends Minigame implements Listener {
         g.spawnVillagers();
 
         updatePreferences();
+
+        new GlowStoneFixer(this, g.world);
     }
 
     private ItemStack dye(Material material, ChatColor chatColor) {
