@@ -19,7 +19,11 @@ public class Regen implements Runnable {
         for (Game game : MG.core().getGames(bedWars)) {
             for (Player player : game.players) {
                 if (player.getHealth() < 20) {
-                    player.setHealth(player.getHealth() + 1);
+                    double newHealth = player.getHealth() + 1;
+                    if (newHealth > 20) {
+                        newHealth = 20;
+                    }
+                    player.setHealth(newHealth);
                 }
             }
         }
