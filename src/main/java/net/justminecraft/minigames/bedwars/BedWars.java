@@ -2,6 +2,7 @@ package net.justminecraft.minigames.bedwars;
 
 import net.justminecraft.minigames.minigamecore.*;
 import net.justminecraft.minigames.minigamecore.worldbuffer.WorldBuffer;
+import net.justminecraft.minigames.titleapi.TitleAPI;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -231,6 +232,8 @@ public class BedWars extends Minigame implements Listener {
                 Player p = Bukkit.getPlayerExact(member);
                 if (game.players.contains(p)) {
                     p.sendMessage(ChatColor.BOLD + "Your bed has been destroyed!!");
+                    TitleAPI.sendTitle(p, 10, 100, 10, bedTeam.getPrefix() + player.getName() + " has broken your bed!", ChatColor.GOLD + "You will no longer be able to respawn");
+                    p.playSound(p.getLocation(), Sound.ANVIL_BREAK, 1, 1);
                 }
             }
 
