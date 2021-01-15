@@ -276,7 +276,7 @@ public class BedWars extends Minigame implements Listener {
                 if (e.getAction() == Action.LEFT_CLICK_BLOCK && (e.getClickedBlock().getType() == Material.BED_BLOCK || game.playerBlocks.contains(e.getClickedBlock()))) {
                     Team playerTeam = game.scoreboard.getEntryTeam(e.getPlayer().getName());
                     game.teamBeds.forEach((team, block) -> {
-                        if (!team.equals(playerTeam) && block.getLocation().distanceSquared(e.getClickedBlock().getLocation()) <= 3*3) {
+                        if (!team.equals(playerTeam) && block.getLocation().distanceSquared(e.getClickedBlock().getLocation()) <= 3*3 && block.getType() == Material.BED_BLOCK) {
                             team.getEntries().forEach(entry -> {
                                 Player player = Bukkit.getPlayer(entry);
                                 if (game.players.contains(player)) {
