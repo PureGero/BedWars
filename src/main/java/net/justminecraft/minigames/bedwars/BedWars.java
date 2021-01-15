@@ -273,6 +273,22 @@ public class BedWars extends Minigame implements Listener {
                     Bukkit.getScheduler().runTaskLater(this, () -> bed.send(e.getPlayer()), 0);
                 }
 
+                if (e.getAction() == Action.LEFT_CLICK_BLOCK && (e.getClickedBlock().getType() == Material.BED_BLOCK || game.playerBlocks.contains(e.getClickedBlock()))) {
+                    Team playerTeam = game.scoreboard.getEntryTeam(e.getPlayer().getName());
+                    game.teamBeds.forEach((team, block) -> {
+                        if (!team.equals(playerTeam) && block.getLocation().distanceSquared(e.getClickedBlock().getLocation()) <= 3*3) {
+                            team.getEntries().forEach(entry -> {
+                                Player player = Bukkit.getPlayer(entry);
+                                if (game.players.contains(player)) {
+                                    player.playSound(player.getLocation(), "block.anvil.place", 1, 1);
+                                    TitleAPI.sendTitle(player, 0, 50, 20, "", ChatColor.RED + "Your bed is under attack!");
+                                    player.sendMessage(ChatColor.RED + "Your bed is under attack!");
+                                }
+                            });
+                        }
+                    });
+                }
+
                 ItemStack item = e.getItem();
                 if (item != null && item.getType() == Material.FIREBALL && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
                     LargeFireball fireball = e.getClickedBlock().getWorld().spawn(e.getClickedBlock().getLocation().add(0.5, 1.5, 0.5), LargeFireball.class);
