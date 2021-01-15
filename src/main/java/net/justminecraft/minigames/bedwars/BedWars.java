@@ -292,6 +292,7 @@ public class BedWars extends Minigame implements Listener {
                 ItemStack item = e.getItem();
                 if (item != null && item.getType() == Material.FIREBALL && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
                     LargeFireball fireball = e.getClickedBlock().getWorld().spawn(e.getClickedBlock().getLocation().add(0.5, 1.5, 0.5), LargeFireball.class);
+                    fireball.setShooter(e.getPlayer());
                     fireball.setDirection(new Vector(0, 0, 0));
                     fireball.setYield(3);
                 }
