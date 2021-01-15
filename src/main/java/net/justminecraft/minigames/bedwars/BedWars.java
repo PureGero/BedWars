@@ -10,6 +10,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -24,6 +25,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -196,6 +198,8 @@ public class BedWars extends Minigame implements Listener {
             if (e.getRightClicked() instanceof Villager) {
                 if (((Villager) e.getRightClicked()).getProfession() == Villager.Profession.LIBRARIAN) {
                     e.getPlayer().openInventory(new UpgradesShop(e.getPlayer()).getInventory());
+                } else if (((Villager) e.getRightClicked()).getProfession() == Villager.Profession.PRIEST) {
+                    e.getPlayer().openInventory(new MiscShop().getInventory());
                 } else {
                     e.getPlayer().openInventory(new ItemsShop(game.playerColours.get(e.getPlayer())).getInventory());
                 }
@@ -268,6 +272,13 @@ public class BedWars extends Minigame implements Listener {
                 if (bed != null) {
                     Bukkit.getScheduler().runTaskLater(this, () -> bed.send(e.getPlayer()), 0);
                 }
+
+                ItemStack item = e.getItem();
+                if (item != null && item.getType() == Material.FIREBALL && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                    LargeFireball fireball = e.getClickedBlock().getWorld().spawn(e.getClickedBlock().getLocation().add(0.5, 1.5, 0.5), LargeFireball.class);
+                    fireball.setDirection(new Vector(0, 0, 0));
+                    fireball.setYield(3);
+                }
             }
         }
     }
@@ -287,7 +298,10 @@ public class BedWars extends Minigame implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent e) {
-        if (e.getEntity() instanceof Villager && e.getEntity().getLocation().getY() > 0 && MG.core().getGame(e.getEntity().getWorld()) instanceof BedWarsGame) {
+        if (e.getEntity() instanceof Villager && MG.core().getGame(e.getEntity().getWorld()) instanceof BedWarsGame) {
+            if (e.getEntity().getLocation().getY() < 0) {
+                e.getEntity().teleport(((BedWarsGame) MG.core().getGame(e.getEntity().getWorld())).villagerSpawnLocations.get(e.getEntity()));
+            }
             e.setCancelled(true);
         }
     }

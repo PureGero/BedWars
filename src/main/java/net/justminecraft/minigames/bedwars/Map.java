@@ -18,7 +18,8 @@ public enum Map {
             new Vector[] {
                     new Vector(-10, 6, -10),
                     new Vector(10, 6, 10)
-            }
+            },
+            new Vector(0, -3, 0)
     ),
     MUSHROOM(
             51,
@@ -28,7 +29,8 @@ public enum Map {
             new Vector[] {
                     new Vector(0, 5, -6),
                     new Vector(0, 5, 4)
-            }
+            },
+            new Vector(1, 20, -1)
     );
 
     private final int distance;
@@ -36,13 +38,15 @@ public enum Map {
     private final Vector shopVector;
     private final Vector upgradeVector;
     private final Vector[] emeraldVectors;
+    private final Vector miscVector;
 
-    Map(int distance, Vector ironVector, Vector shopVector, Vector upgradeVector, Vector[] emeraldVectors) {
+    Map(int distance, Vector ironVector, Vector shopVector, Vector upgradeVector, Vector[] emeraldVectors, Vector miscVector) {
         this.distance = distance;
         this.ironVector = ironVector;
         this.shopVector = shopVector;
         this.upgradeVector = upgradeVector;
         this.emeraldVectors = emeraldVectors;
+        this.miscVector = miscVector;
     }
 
     public int getDistance() {
@@ -63,6 +67,10 @@ public enum Map {
 
     public Vector[] getEmeraldVectors() {
         return emeraldVectors;
+    }
+
+    public Vector getMiscVector() {
+        return miscVector;
     }
 
     public void placeSchematic(WorldBuffer w, Location l, String key) {

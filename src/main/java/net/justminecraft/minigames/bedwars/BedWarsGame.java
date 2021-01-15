@@ -5,6 +5,7 @@ import net.justminecraft.minigames.minigamecore.Minigame;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
@@ -51,6 +52,7 @@ public class BedWarsGame extends Game {
     HashSet<Block> playerBlocks = new HashSet<>();
     HashMap<Player, Short> playerColours = new HashMap<>();
     HashMap<Team, HashMap<Enchantment, Integer>> enchantments = new HashMap<>();
+    HashMap<Entity, Location> villagerSpawnLocations = new HashMap<>();
     int teamSize = 1;
     int teamCount;
     private BedWars bedwars;
@@ -275,6 +277,7 @@ public class BedWarsGame extends Game {
             villager.setProfession(Villager.Profession.BLACKSMITH);
             villager.setCustomName(ChatColor.GOLD + "Items Shop");
             villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60 * 60 * 20, 127, true, false));
+            villagerSpawnLocations.put(villager, location);
 
             location = spawnLocation.clone().add(0.5, 0, 0.5).add(rotate(map.getUpgradeVector(), bedwars.getAngle(spawnLocation)));
             location.setYaw((float) (bedwars.getAngleDegrees(spawnLocation) + 90));
@@ -282,7 +285,15 @@ public class BedWarsGame extends Game {
             villager.setProfession(Villager.Profession.LIBRARIAN);
             villager.setCustomName(ChatColor.GREEN + "Upgrades Shop");
             villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60 * 60 * 20, 127, true, false));
+            villagerSpawnLocations.put(villager, location);
         });
+
+        Location location = new Location(world, 0, 64, 0).add(0.5, 0, 0.5).add(map.getMiscVector());
+        Villager villager = location.getWorld().spawn(location, Villager.class);
+        villager.setProfession(Villager.Profession.PRIEST);
+        villager.setCustomName(ChatColor.AQUA + "Geoff Walter");
+        villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60 * 60 * 20, 127, true, false));
+        villagerSpawnLocations.put(villager, location);
     }
 
     public void sendBeds(Player p) {
