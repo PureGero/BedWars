@@ -8,6 +8,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -229,9 +230,10 @@ public class BedWarsGame extends Game {
     public void ironTicker() {
         Bukkit.getScheduler().scheduleSyncDelayedTask(minigame, () -> {
             if (!players.isEmpty()) {
-                teamSpawnLocations.forEach((team, location) -> location.getWorld().dropItem(
+                teamSpawnLocations.forEach((team, location) -> dropItem(
                         location.clone().add(rotate(map.getIronVector(), bedwars.getAngle(location))).add(0.5, 0, 0.5),
-                        new ItemStack(Material.IRON_INGOT, hasDroppedStartingIron ? enchantments.get(team).getOrDefault(Enchantment.LURE, 0) + 1 : 8)
+                        Material.IRON_INGOT,
+                        hasDroppedStartingIron ? enchantments.get(team).getOrDefault(Enchantment.LURE, 0) + 1 : 8
                 ));
                 hasDroppedStartingIron = true;
                 ironTicker();
@@ -242,7 +244,7 @@ public class BedWarsGame extends Game {
     public void diamondTicker() {
         Bukkit.getScheduler().scheduleSyncDelayedTask(minigame, () -> {
             if (!players.isEmpty()) {
-                getDiamondSpawnLocations().forEach(location -> location.getWorld().dropItem(location.add(0.5, 2, 0.5), new ItemStack(Material.DIAMOND)));
+                getDiamondSpawnLocations().forEach(location -> dropItem(location.add(0.5, 2, 0.5), Material.DIAMOND, 1));
                 diamondTicker();
             }
         }, 20 * 15);
@@ -251,10 +253,18 @@ public class BedWarsGame extends Game {
     public void emeraldTicker() {
         Bukkit.getScheduler().scheduleSyncDelayedTask(minigame, () -> {
             if (!players.isEmpty()) {
-                getEmeraldSpawnLocations().forEach(location -> location.getWorld().dropItem(location, new ItemStack(Material.EMERALD)));
+                getEmeraldSpawnLocations().forEach(location -> dropItem(location, Material.EMERALD, 1));
                 emeraldTicker();
             }
         }, 20 * 30);
+    }
+
+    private void dropItem(Location location, Material mat, int count) {
+        ItemStack item = new ItemStack(mat, count);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("RAW");
+        item.setItemMeta(meta);
+        location.getWorld().dropItem(location, item);
     }
 
     public void spawnVillagers() {

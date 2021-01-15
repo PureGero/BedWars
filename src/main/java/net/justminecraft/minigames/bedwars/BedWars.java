@@ -19,6 +19,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -310,12 +311,19 @@ public class BedWars extends Minigame implements Listener {
     public void onItemPickup(PlayerPickupItemEvent e) {
         Game g = MG.core().getGame(e.getPlayer());
         if (g instanceof BedWarsGame) {
-            if (e.getItem().getItemStack().getType() == Material.IRON_INGOT) {
-                Team team = ((BedWarsGame) g).scoreboard.getEntryTeam(e.getPlayer().getName());
-                for (String entry : team.getEntries()) {
-                    Player player = Bukkit.getPlayer(entry);
-                    if (player != e.getPlayer() && g.players.contains(player)) {
-                        player.getInventory().addItem(e.getItem().getItemStack());
+            ItemStack itemStack = e.getItem().getItemStack();
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null && meta.hasDisplayName() && meta.getDisplayName().equals("RAW")) {
+                meta.setDisplayName(null);
+                itemStack.setItemMeta(meta);
+                e.getItem().setItemStack(itemStack);
+                if (itemStack.getType() == Material.IRON_INGOT) {
+                    Team team = ((BedWarsGame) g).scoreboard.getEntryTeam(e.getPlayer().getName());
+                    for (String entry : team.getEntries()) {
+                        Player player = Bukkit.getPlayer(entry);
+                        if (player != e.getPlayer() && g.players.contains(player)) {
+                            player.getInventory().addItem(e.getItem().getItemStack());
+                        }
                     }
                 }
             }
