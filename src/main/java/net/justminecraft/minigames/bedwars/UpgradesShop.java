@@ -44,6 +44,7 @@ public class UpgradesShop extends Shop {
         meta.addEnchant(enchantment, level + 1, true);
         meta.setDisplayName(name);
         meta.setLore(Arrays.asList(
+                ChatColor.GRAY + "Upgrades are applied to the entire team",
                 "",
                 (level >= 1 ? ChatColor.GREEN : ChatColor.RED) + name + " Tier I: 2 emeralds",
                 (level >= 2 ? ChatColor.GREEN : ChatColor.RED) + name + " Tier II: 4 emeralds",

@@ -34,16 +34,11 @@ public class Shop implements InventoryHolder {
     public Shop setItem(int i, ShopItem item) {
         items.put(i, item);
 
-        ItemStack clickable = new ItemStack(item.getItem());
-        ItemMeta meta = clickable.getItemMeta();
-        ArrayList<String> lore = new ArrayList<>();
-        if (meta.getLore() != null) lore.addAll(meta.getLore());
-        lore.addAll(Arrays.asList(
+        ItemStack clickable = lore(
+                new ItemStack(item.getItem()),
                 "",
                 ChatColor.GOLD + "Cost: " + item.getCost().getAmount() + " " + readable(item.getCost().getType().name()) + (item.getCost().getAmount() == 1 ? "" : "s")
-        ));
-        meta.setLore(lore);
-        clickable.setItemMeta(meta);
+        );
         inventory.setItem(i, clickable);
 
         return this;
@@ -82,5 +77,19 @@ public class Shop implements InventoryHolder {
 
     public ItemStack emerald(int amount) {
         return new ItemStack(Material.EMERALD, amount);
+    }
+
+    public ItemStack lore(ItemStack itemStack, String... loreToAdd) {
+        ItemMeta meta = itemStack.getItemMeta();
+        ArrayList<String> lore = new ArrayList<>();
+
+        if (meta.getLore() != null) {
+            lore.addAll(meta.getLore());
+        }
+
+        lore.addAll(Arrays.asList(loreToAdd));
+        meta.setLore(lore);
+        itemStack.setItemMeta(meta);
+        return itemStack;
     }
 }
