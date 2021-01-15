@@ -175,6 +175,7 @@ public class BedWarsGame extends Game {
 
         p.getInventory().clear();
         p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD));
+        p.getActivePotionEffects().forEach(potionEffect -> p.removePotionEffect(potionEffect.getType()));
         UpgradesShop.updateEnchants(p);
 
         Team team = scoreboard.getEntryTeam(p.getName());
