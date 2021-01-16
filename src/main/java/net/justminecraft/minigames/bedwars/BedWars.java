@@ -249,6 +249,8 @@ public class BedWars extends Minigame implements Listener {
             Team team = game.scoreboard.getEntryTeam(player.getName());
             game.broadcast(team.getPrefix() + player.getName() + ChatColor.GOLD + " has broken " + game.getTeamName(bedTeam) + "'s bed" + ChatColor.GOLD + "!");
 
+            PlayerData.get(player.getUniqueId()).incrementStat(getMinigameName(), "beds_broken");
+
             game.updateScore(bedTeam);
         }
 
