@@ -50,6 +50,12 @@ public class BedWars extends Minigame implements Listener {
         getLogger().info("BedWars enabled");
 
         spawnTeamPreferenceVillages();
+
+        TopWinStreaks.load(getDataFolder());
+
+        getServer().getScheduler().runTaskTimerAsynchronously(this, () -> TopWinStreaks.save(getDataFolder()), 15 * 60 * 20, 15 * 60 * 20);
+
+        new TopWinStreaksDisplay(this);
     }
 
 //    private void noAI(EntityInsentient entity) {
@@ -99,6 +105,7 @@ public class BedWars extends Minigame implements Listener {
     }
 
     public void onDisable() {
+        TopWinStreaks.save(getDataFolder());
         getLogger().info("BedWars disabled");
     }
 
