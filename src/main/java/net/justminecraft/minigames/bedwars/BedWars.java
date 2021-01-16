@@ -288,13 +288,27 @@ public class BedWars extends Minigame implements Listener {
                         }
                     });
                 }
+            }
+        }
 
-                ItemStack item = e.getItem();
-                if (item != null && item.getType() == Material.FIREBALL && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                    LargeFireball fireball = e.getClickedBlock().getWorld().spawn(e.getClickedBlock().getLocation().add(0.5, 1.5, 0.5), LargeFireball.class);
-                    fireball.setShooter(e.getPlayer());
-                    fireball.setDirection(new Vector(0, 0, 0));
-                    fireball.setYield(3);
+        if (MG.core().getGame(e.getPlayer()) instanceof BedWarsGame) {
+            ItemStack item = e.getItem();
+            if (item != null && item.getType() == Material.FIREBALL && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                LargeFireball fireball = e.getClickedBlock().getWorld().spawn(e.getClickedBlock().getLocation().add(0.5, 1.5, 0.5), LargeFireball.class);
+                fireball.setShooter(e.getPlayer());
+                fireball.setDirection(new Vector(0, 0, 0));
+                fireball.setYield(3);
+            }
+            if (item != null && item.getType() == Material.FIREBALL && (e.getAction() == Action.LEFT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_AIR)) {
+                LargeFireball fireball = e.getPlayer().getWorld().spawn(e.getPlayer().getEyeLocation().add(e.getPlayer().getEyeLocation().getDirection()), LargeFireball.class);
+                fireball.setShooter(e.getPlayer());
+                fireball.setDirection(e.getPlayer().getEyeLocation().getDirection());
+                fireball.setYield(3);
+                if (item.getAmount() > 1) {
+                    item.setAmount(item.getAmount() - 1);
+                } else {
+                    item.setType(Material.AIR);
+                    e.getPlayer().setItemInHand(item);
                 }
             }
         }
