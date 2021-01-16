@@ -237,6 +237,11 @@ public class BedWars extends Minigame implements Listener {
         }
 
         if (bedTeam != null) {
+            if (bedTeam.equals(game.scoreboard.getEntryTeam(player.getName()))) {
+                player.sendMessage(ChatColor.RED + "You can't break your own bed!");
+                return;
+            }
+
             for (String member : bedTeam.getEntries()) {
                 Player p = Bukkit.getPlayerExact(member);
                 if (game.players.contains(p)) {
