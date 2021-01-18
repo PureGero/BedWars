@@ -189,7 +189,7 @@ public class BedWarsGame extends Game {
             p.setHealth(20);
             p.setFallDistance(0);
             p.setGameMode(GameMode.SPECTATOR);
-            new PlayerRespawn((BedWars) minigame, p, teamBeds.get(team));
+            new PlayerRespawn(this, p, teamBeds.get(team));
 
             if (p.getLocation().getY() < 30) {
                 p.teleport(new Location(p.getWorld(), 20, 90, 20, 135, 45));
