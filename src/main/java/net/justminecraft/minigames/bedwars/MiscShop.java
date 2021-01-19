@@ -9,7 +9,7 @@ public class MiscShop extends Shop {
     public MiscShop() {
         super("Geoff Walter", 3 * 9);
 
-        setItem(11, new ShopItem(new ItemStack(Material.FIREBALL), emerald(6)));
+        setItem(11, new ShopItem(new ItemStack(Material.FIREBALL), emerald(7)));
 
         setItem(13, new ShopItem(invisPot(), emerald(6)));
 
