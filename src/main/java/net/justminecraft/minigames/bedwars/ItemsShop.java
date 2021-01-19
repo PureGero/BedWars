@@ -28,7 +28,7 @@ public class ItemsShop extends Shop {
         setItem(24, new ShopItem(new ItemStack(Material.BOW), diamond(10)));
 
         setItem(16, new ShopItem(new ItemStack(Material.LADDER, 5), iron(4)));
-        setItem(25, new ShopItem(new ItemStack(Material.ENDER_PEARL), diamond(3)));
+        setItem(25, new ShopItem(new ItemStack(Material.ENDER_PEARL), diamond(4)));
     }
 
     private boolean replaceSword(Player player, Material sword) {
