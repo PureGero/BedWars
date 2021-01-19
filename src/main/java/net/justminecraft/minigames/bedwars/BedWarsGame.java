@@ -26,8 +26,8 @@ public class BedWarsGame extends Game {
             ChatColor.RED,
             ChatColor.GREEN,
             ChatColor.YELLOW,
-            ChatColor.GOLD,
             ChatColor.LIGHT_PURPLE,
+            ChatColor.GOLD,
             ChatColor.DARK_PURPLE,
             ChatColor.DARK_GREEN
     );
@@ -37,8 +37,8 @@ public class BedWarsGame extends Game {
             14,
             5,
             4,
-            1,
             2,
+            1,
             10,
             13
     );
@@ -132,7 +132,7 @@ public class BedWarsGame extends Game {
     public List<Location> getIslandSpawnLocations() {
         List<Location> locations = new ArrayList<>();
 
-        if (teamCount == 1 || teamCount == 2 ||teamCount == 4) {
+        if (teamCount == 1 || teamCount == 2 || teamCount == 4) {
             for (int i = 0; i < 16; i++) {
                 if (i % (16 / teamCount / 2) == 0) {
                     continue;

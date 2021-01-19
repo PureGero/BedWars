@@ -111,7 +111,7 @@ public class BedWars extends Minigame implements Listener {
 
     @Override
     public int getMaxPlayers() {
-        return 32;
+        return 16;
     }
 
     @Override
@@ -638,9 +638,9 @@ public class BedWars extends Minigame implements Listener {
             }
         }
 
-        int minTeamSize = g.teamSize = (int) Math.ceil(g.players.size() / 8.0);
+        int minTeamSize = g.teamSize = (int) Math.ceil(g.players.size() / 5.0);
 
-        if (g.players.size() >= 4 && teamPreferences > 0 && Math.random() * (soloPreferences + teamPreferences) < teamPreferences) {
+        if (g.players.size() >= 4 && minTeamSize < 2 && teamPreferences > 0 && Math.random() * (soloPreferences + teamPreferences) < teamPreferences) {
             // Teams is preferred
             minTeamSize = 2;
         }
