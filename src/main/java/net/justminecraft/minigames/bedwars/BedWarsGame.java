@@ -69,6 +69,11 @@ public class BedWarsGame extends Game {
             throw new IllegalStateException("map has already been set!");
         }
 
+        if (System.currentTimeMillis() < 1642896000000L && Math.random() < 0.3) {
+            // Increase chance of new map until new Date('2022-01-23 00:00:00.000+00').getTime();
+            return map = Map.DRAGON;
+        }
+
         return map = Map.values()[(int) (Math.random() * Map.values().length)];
     }
 
@@ -273,7 +278,7 @@ public class BedWarsGame extends Game {
     public void spawnVillagers() {
         getSpawnLocations().forEach(spawnLocation -> {
             Location location = spawnLocation.clone().add(0.5, 0, 0.5).add(rotate(map.getShopVector(), bedwars.getAngle(spawnLocation)));
-            location.setYaw((float) (bedwars.getAngleDegrees(spawnLocation) - 90));
+            location.setYaw((float) (bedwars.getAngleDegrees(spawnLocation) - 90 - map.getVillagerAngle()));
             Villager villager = location.getWorld().spawn(location, Villager.class);
             villager.setProfession(Villager.Profession.BLACKSMITH);
             villager.setCustomName(ChatColor.GOLD + "Items Shop");
@@ -281,7 +286,7 @@ public class BedWarsGame extends Game {
             villagerSpawnLocations.put(villager, location);
 
             location = spawnLocation.clone().add(0.5, 0, 0.5).add(rotate(map.getUpgradeVector(), bedwars.getAngle(spawnLocation)));
-            location.setYaw((float) (bedwars.getAngleDegrees(spawnLocation) + 90));
+            location.setYaw((float) (bedwars.getAngleDegrees(spawnLocation) + 90 + map.getVillagerAngle()));
             villager = location.getWorld().spawn(location, Villager.class);
             villager.setProfession(Villager.Profession.LIBRARIAN);
             villager.setCustomName(ChatColor.GREEN + "Upgrades Shop");

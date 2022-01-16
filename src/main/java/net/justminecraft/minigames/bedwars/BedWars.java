@@ -75,12 +75,12 @@ public class BedWars extends Minigame implements Listener {
 //            ((CraftVillager) e).getHandle().setPositionRotation(138.5, 167, 389.5, 170, 0);
 //        };
 //
-//        Location location = new Location(Bukkit.getWorlds().get(0), 138.5, 167, 389.5, 170, 0);
-//        location.getWorld().getNearbyEntities(location, 1, 1, 1).forEach(entity -> {
-//            if (entity instanceof Villager) {
-//                entity.remove();
-//            }
-//        });
+        Location location = new Location(Bukkit.getWorlds().get(0), 138.5, 167, 389.5, 170, 0);
+        location.getWorld().getNearbyEntities(location, 1, 1, 1).forEach(entity -> {
+            if (entity instanceof Villager) {
+                entity.setCustomName(ChatColor.GREEN + "Solo");
+            }
+        });
 //
 //        Villager villager = location.getWorld().spawn(location, Villager.class);
 //        villager.setProfession(Villager.Profession.BLACKSMITH);
@@ -90,13 +90,13 @@ public class BedWars extends Minigame implements Listener {
 //        ((CraftVillager) villager).getHandle().setPositionRotation(138.5, 167, 389.5, 170, 0);
 //        Bukkit.getScheduler().runTaskTimer(this, teleportLater.apply(villager, location), 20, 20);
 //
-//        location = new Location(Bukkit.getWorlds().get(0), 134.5, 167, 389.5, -170, 0);
-//        location.getWorld().getNearbyEntities(location, 1, 1, 1).forEach(entity -> {
-//            if (entity instanceof Villager) {
-//                entity.remove();
-//            }
-//        });
-//
+        location = new Location(Bukkit.getWorlds().get(0), 134.5, 167, 389.5, -170, 0);
+        location.getWorld().getNearbyEntities(location, 1, 1, 1).forEach(entity -> {
+            if (entity instanceof Villager) {
+                entity.setCustomName(ChatColor.AQUA + "Teams");
+            }
+        });
+
 //        villager = location.getWorld().spawn(location, Villager.class);
 //        villager.setProfession(Villager.Profession.LIBRARIAN);
 //        villager.setCustomName(ChatColor.AQUA + "Teams");

@@ -19,7 +19,8 @@ public enum Map {
                     new Vector(-10, 6, -10),
                     new Vector(10, 6, 10)
             },
-            new Vector(0, -3, 0)
+            new Vector(0, -3, 0),
+            0
     ),
     MUSHROOM(
             51,
@@ -30,7 +31,20 @@ public enum Map {
                     new Vector(0, 5, -6),
                     new Vector(0, 5, 4)
             },
-            new Vector(1, 20, -1)
+            new Vector(1, 20, -1),
+            0
+    ),
+    DRAGON(
+            51,
+            new Vector(0, 1, -16),
+            new Vector(-4, 0, -6),
+            new Vector(4, 0, -6),
+            new Vector[] {
+                    new Vector(-10, 2, -10),
+                    new Vector(10, 2, 10)
+            },
+            new Vector(0, -4, 0),
+        45
     );
 
     private final int distance;
@@ -39,14 +53,16 @@ public enum Map {
     private final Vector upgradeVector;
     private final Vector[] emeraldVectors;
     private final Vector miscVector;
+    private final float villagerAngle;
 
-    Map(int distance, Vector ironVector, Vector shopVector, Vector upgradeVector, Vector[] emeraldVectors, Vector miscVector) {
+    Map(int distance, Vector ironVector, Vector shopVector, Vector upgradeVector, Vector[] emeraldVectors, Vector miscVector, float villagerAngle) {
         this.distance = distance;
         this.ironVector = ironVector;
         this.shopVector = shopVector;
         this.upgradeVector = upgradeVector;
         this.emeraldVectors = emeraldVectors;
         this.miscVector = miscVector;
+        this.villagerAngle = villagerAngle;
     }
 
     public int getDistance() {
@@ -71,6 +87,10 @@ public enum Map {
 
     public Vector getMiscVector() {
         return miscVector;
+    }
+
+    public float getVillagerAngle() {
+        return villagerAngle;
     }
 
     public void placeSchematic(WorldBuffer w, Location l, String key) {
