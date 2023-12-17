@@ -1,14 +1,15 @@
 package net.justminecraft.minigames.bedwars;
 
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.minecraft.Position;
+import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.protocols.protocol1_13to1_12_2.ClientboundPackets1_13;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import us.myles.ViaVersion.api.PacketWrapper;
-import us.myles.ViaVersion.api.Via;
-import us.myles.ViaVersion.api.minecraft.Position;
-import us.myles.ViaVersion.api.protocol.ProtocolVersion;
-import us.myles.ViaVersion.api.type.Type;
-import us.myles.ViaVersion.protocols.protocol1_13to1_12_2.Protocol1_13To1_12_2;
+import com.viaversion.viaversion.protocols.protocol1_13to1_12_2.Protocol1_13To1_12_2;
 
 public class ColouredBed {
     private final Location location;
@@ -42,8 +43,8 @@ public class ColouredBed {
     public void send(Player player) {
         try {
             if (Via.getAPI().getPlayerVersion(player.getUniqueId()) >= ProtocolVersion.v1_13.getVersion()) {
-                PacketWrapper packet = new PacketWrapper(0x0B, null, Via.getManager().getConnection(player.getUniqueId()));
-                packet.write(Type.POSITION, new Position(location.getBlockX(), (short) location.getBlockY(), location.getBlockZ()));
+                PacketWrapper packet = PacketWrapper.create(ClientboundPackets1_13.BLOCK_CHANGE, Via.getManager().getConnectionManager().getConnectedClient(player.getUniqueId()));
+                packet.write(Type.POSITION1_8, new Position(location.getBlockX(), (short) location.getBlockY(), location.getBlockZ()));
                 packet.write(Type.VAR_INT, id);
                 packet.send(Protocol1_13To1_12_2.class);
             }
